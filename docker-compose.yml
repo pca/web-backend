@@ -1,0 +1,28 @@
+version: "2"
+services:
+  app:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    env_file: development.env
+    environment:
+      PYTHONUNBUFFERED: 1
+    links:
+      - mysql
+      - redis
+    ports:
+      - 8000:8000
+    volumes:
+      - ./src:/app
+  mysql:
+    image: mysql:5.6
+    env_file: development.env
+    volumes:
+      - pca_volume:/var/lib/mysql
+  redis:
+    image: redis:2.8
+    command: redis-server --appendonly yes
+    volumes:
+      - pca_volume:/data
+volumes:
+  pca_volume:
+    driver: local

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="row mt-50">
+    <div class="col">
+      <h1>Upcoming Competitions</h1>
+    </div>
+  </div>
+  <div class="row mt-30">
+    <div class="col">
+      <ul class="list-unstyled">
+        {% for competition in upcoming_competitions %}
+          <li>
+            <a href="{{ competition.website }}"><b>{{ competition.name }} - {{ competition.city }}</b></a>
+            <p>{{ competition.start_date }} to {{ competition.end_date }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

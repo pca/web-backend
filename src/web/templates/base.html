@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Philippine Cubers Association</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+      body {
+        padding-top: 5rem;
+        position: relative;
+      }
+      .rotate45 {
+        transform: rotate(45deg);
+      }
+      .indent {
+        text-indent: 50px;
+      }
+      .mt-50 {
+        margin-top: 50px;
+      }
+      .mt-30 {
+        margin-top: 30px;
+      }
+      .mb-50 {
+        margin-bottom: 50px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <nav id="pca-navbar" class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="{% url 'web:index' %}">PCA</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#pcaNavbar" aria-controls="pcaNavbar" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="pcaNavbar">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+              <a class="nav-link{% if page == 'index' %} active{% endif %}" href="{% url 'web:index' %}">History</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link{% if page == 'competitions' %} active{% endif %}" href="{% url 'web:competitions' %}">Competitions</a>
+            </li>
+            <li class="nav-item dropdown{% if 'rankings' in page %} active{% endif %}">
+              <a class="nav-link dropdown-toggle" href="#" id="rankings-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rankings</a>
+              <div class="dropdown-menu" aria-labelledby="rankings-dropdown">
+                <a class="dropdown-item{% if page == 'rankings_national' %} active{% endif %}" href="{% url 'web:national_rankings' %}">National Ranking</a>
+                <a class="dropdown-item{% if page == 'rankings_regional' %} active{% endif %}" href="{% url 'web:regional_rankings' %}">Regional Ranking</a>
+                <a class="dropdown-item{% if page == 'rankings_cityprovincial' %} active{% endif %}" href="{% url 'web:cityprovincial_rankings' %}">City/Provincial Ranking</a>
+              </div>
+            </li>
+          </ul>
+          <ul class="navbar-nav mr-right">
+            {% if user.is_authenticated %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="profile-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ user.wcaprofile }}</a>
+                <div class="dropdown-menu" aria-labelledby="profile-dropdown">
+                  <a class="dropdown-item{% if page == 'profile' %} active{% endif %}" href="{% url 'web:profile' %}">Profile</a>
+                  <a class="dropdown-item" href="{% url 'web:logout' %}">Logout</a>
+                </div>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ wca_login_uri }}">Login with WCA</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main role="main" class="container">
+      {% block content %}{% endblock %}
+    </main><!-- /.container -->
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    {% block scripts %}{% endblock %}
+
+  </body>
+</html>

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="row mt-50">
+    <div class="col-sm-3">
+      <div class="card">
+        <img class="card-img-top" src="{{ user.wcaprofile.avatar_thumb_url }}">
+        <div class="card-body">
+          <h5 class="card-title">{{ user.wcaprofile.name }}</h5>
+          <p class="card-text">
+            {% if user.wcaprofile.wca_id %}
+              WCA ID: {{ user.wcaprofile.wca_id }}
+            {% else %}
+              No WCA ID yet
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Details</h5>
+          <p class="card-text">
+            <p>Joined WCA: {{ user.wcaprofile.wca_created_at }}</p>
+            <p>Joined PCA: {{ user.date_joined }}</p>
+            <hr>
+            <form action="{% url 'web:profile' %}" method="post">
+              {% csrf_token %}
+              <div class="form-group">
+                <label for="{{ form.region.id_for_label }}">Region:</label>
+                <select name="{{ form.region.name }}" required id="{{ form.region.id_for_label }}" class="form-control">
+                  {% for value, label in form.fields.region.choices %}
+                    {% if form.region.value == value %}
+                      <option value="{{ value }}" selected>{{ value }} - {{ label }}</option>
+                    {% else %}
+                      <option value="{{ value }}">{{ value }} - {{ label }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="{{ form.city_province.id_for_label }}">City/Province:</label>
+                <select name="{{ form.city_province.name }}" required id="{{ form.city_province.id_for_label }}" class="form-control">
+                  <option value="" selected>---------</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-default">Save</button>
+            </form>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    $(document).ready(function() {
+      var CITIES_PROVINCES_DIRECTORY = {{ cities_provinces_directory|safe }};
+
+      var initial_region = '{{ form.region.value }}';
+      var initial_city_province = '{{ form.city_province.value }}';
+
+      var initial_cities_provinces = CITIES_PROVINCES_DIRECTORY[initial_region];
+
+      // Insert initial cities/provinces within the initial region
+      $.each(initial_cities_provinces, function(index, city_province) {
+        $('#id_city_province').append('<option value="' + city_province[0] + '" selected>' + city_province[1] + '</option>');
+      })
+
+      // Set current city/province
+      $('#id_city_province option[value="' + initial_city_province + '"]').prop('selected', true);
+
+      $('#id_region').change(function() {
+        // Clear city/provinces
+        $('#id_city_province').empty();
+
+        var region = $(this).val();
+        var cities_provinces = CITIES_PROVINCES_DIRECTORY[region];
+
+        // Insert blank option
+        $('#id_city_province').append('<option value="" selected>---------</option>');
+
+        // Insert cities/provinces within the selected region
+        $.each(cities_provinces, function(index, city_province) {
+          $('#id_city_province').append('<option value="' + city_province[0] + '" selected>' + city_province[1] + '</option>');
+        })
+
+        // Set default selected city/province to blank
+        $('#id_city_province option[value=""]').prop('selected', true);
+      });
+    })
+  </script>
+{% endblock %}

@@ -1,0 +1,6 @@
+*.py[cod]
+.env
+production.env
+production.yml
+data/
+venv/
