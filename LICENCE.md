@@ -2,7 +2,7 @@
 
 New BSD License
 
-Copyright (c) 2016, Philippine Cubers Association
+Copyright (c) 2018, Philippine Cubers Association
 
 All rights reserved. 
 
