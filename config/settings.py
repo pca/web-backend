@@ -150,9 +150,10 @@ WCA_CALLBACK = 'http://localhost:8000/wca/callback/'
 
 # RQ
 
+REDIS_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
 RQ_QUEUES = {
     'default': {
-        'URL': os.getenv('REDIS_URL', 'redis://redis:6379/0'),
+        'URL': REDIS_URL,
         'DEFAULT_TIMEOUT': 600,
     },
 }

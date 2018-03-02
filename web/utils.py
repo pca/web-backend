@@ -9,7 +9,7 @@ from wca.models import Result
 from web.models import WCAProfile
 from web.constants import EVENTS
 
-r = redis.StrictRedis(host='redis', port=6379, db=0)
+r = redis.StrictRedis.from_url(settings.REDIS_URL)
 
 
 def wca_authorize_uri():
