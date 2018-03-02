@@ -11,10 +11,10 @@ from django.utils.crypto import get_random_string
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
-from web.constants import LOCATION_DIRECTORY
+from web.constants import LOCATION_DIRECTORY, REGION_CHOICES, NCR
 from web.forms import PCAProfileForm
 from web.models import User, PCAProfile, WCAProfile
-from web.utils import get_rankings, wca_authorize_uri, wca_access_token_uri
+from web.utils import get_rankings, get_all_rankings, wca_authorize_uri, wca_access_token_uri
 
 
 class AuthenticateMixin:
@@ -110,14 +110,13 @@ class RegionalRankingsView(ContentMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(RegionalRankingsView, self).get_context_data(**kwargs)
-        context['single_222'] = get_rankings(event_type='222', rank_type='best', area='regional', area_filter='Region IV-A')
-        context['single_333'] = get_rankings(event_type='333', rank_type='best', area='regional', area_filter='Region IV-A')
-        context['single_444'] = get_rankings(event_type='444', rank_type='best', area='regional', area_filter='Region IV-A')
-        context['single_555'] = get_rankings(event_type='555', rank_type='best', area='regional', area_filter='Region IV-A')
-        context['average_222'] = get_rankings(event_type='222', rank_type='average', area='regional', area_filter='Region IV-A')
-        context['average_333'] = get_rankings(event_type='333', rank_type='average', area='regional', area_filter='Region IV-A')
-        context['average_444'] = get_rankings(event_type='444', rank_type='average', area='regional', area_filter='Region IV-A')
-        context['average_555'] = get_rankings(event_type='555', rank_type='average', area='regional', area_filter='Region IV-A')
+        region = self.request.GET.get('region', NCR)
+        # Validate region
+        if not LOCATION_DIRECTORY.get(region):
+            raise Http404
+        context['region'] = region
+        context['region_choices'] = REGION_CHOICES
+        context['all_rankings'] = get_all_rankings(area='regional', area_filter=region)
         return context
 
 

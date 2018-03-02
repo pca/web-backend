@@ -6,6 +6,7 @@ from django.db.models import Q
 
 from wca.models import Result
 from web.models import WCAProfile
+from web.constants import EVENTS
 
 r = redis.StrictRedis(host='redis', port=6379, db=0)
 
@@ -26,6 +27,16 @@ def wca_access_token_uri(code):
     access_token_uri += '&code=' + code
     access_token_uri += '&grant_type=authorization_code'
     return access_token_uri
+
+
+def get_all_rankings(area='regional', area_filter=None):
+    all_rankings = {}
+    for event in EVENTS:
+        best_rankings = get_rankings(event_type=event, rank_type='best', area=area, area_filter=area_filter)
+        average_rankings = get_rankings(event_type=event, rank_type='average', area=area, area_filter=area_filter)
+        all_rankings['single_{}'.format(event)] = best_rankings
+        all_rankings['average_{}'.format(event)] = average_rankings
+    return all_rankings
 
 
 def get_rankings(event_type='333', rank_type='best', area='national', area_filter=None, num=10):
@@ -65,6 +76,33 @@ def get_rankings(event_type='333', rank_type='best', area='national', area_filte
     if top_results_in_string:
         return json.loads(top_results_in_string)
 
+    results = query_records(
+        event_type=event_type,
+        rank_type=rank_type,
+        area=area,
+        area_filter=area_filter,
+    )
+
+    # Filter results by top ten and without repeating
+    # person (Only the best record for 1 person)
+    top_results = []
+    personsIds = []
+
+    for result in results:
+        if len(top_results) == num:
+            break
+        if result.personId not in personsIds:
+            personsIds.append(result.personId)
+            top_results.append(result.to_dict())
+
+    # Cache result
+    top_results_in_string = json.dumps(top_results)
+    r.set(key, top_results_in_string)
+
+    return top_results
+
+
+def query_records(event_type='333', rank_type='best', area='national', area_filter=None):
     # Get results
     gt_query = {
         'best': Q(best__gt=0),
@@ -86,25 +124,7 @@ def get_rankings(event_type='333', rank_type='best', area='national', area_filte
         wca_ids = [p.wca_id for p in profiles if p.wca_id]  # Get WCA IDs of registered profiles
         area_query &= Q(personId__in=wca_ids)
 
-    results = Result.objects.filter(
+    return Result.objects.filter(
         gt_query[rank_type],
         area_query
     ).order_by(rank_type)
-
-    # Filter results by top ten and without repeating
-    # person (Only the best record for 1 person)
-    top_results = []
-    personsIds = []
-
-    for result in results:
-        if len(top_results) == num:
-            break
-        if result.personId not in personsIds:
-            personsIds.append(result.personId)
-            top_results.append(result.to_dict())
-
-    # Cache result
-    top_results_in_string = json.dumps(top_results)
-    r.set(key, top_results_in_string)
-
-    return top_results

@@ -2,9 +2,25 @@
 {% load static %}
 
 {% block content %}
+  <div class="row">
+    <div class="col">
+      <div class="dropdown clearfix">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownRegionMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          {{ region }}
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownRegionMenu">
+          {% for region_choice in region_choices %}
+            {% if not region == region_choice.0 %}
+              <a class="dropdown-item" href="{% url 'web:regional_rankings' %}?region={{ region_choice.0 }}">{{ region_choice.0 }} - {{ region_choice.1 }}</a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="row mt-50">
     <div class="col">
-      <h1>Regional Ranking (Region IV-A)</h1>
+      <h1>Regional Ranking ({{ region }})</h1>
     </div>
   </div>
   <div class="row mt-30">
@@ -15,7 +31,7 @@
       <h3>3x3x3 Single</h3>
       <table class="table table-sm">
         <tbody>
-          {% for result in single_333 %}
+          {% for result in all_rankings.single_333 %}
             <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ result.personName }}</td>
@@ -29,7 +45,7 @@
       <h3>3x3x3 Average</h3>
       <table class="table table-sm">
         <tbody>
-          {% for result in average_333 %}
+          {% for result in all_rankings.average_333 %}
             <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ result.personName }}</td>
@@ -46,7 +62,7 @@
       <h3>2x2x2 Single</h3>
       <table class="table table-sm">
         <tbody>
-          {% for result in single_222 %}
+          {% for result in all_rankings.single_222 %}
             <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ result.personName }}</td>
@@ -60,7 +76,7 @@
       <h3>2x2x2 Average</h3>
       <table class="table table-sm">
         <tbody>
-          {% for result in average_222 %}
+          {% for result in all_rankings.average_222 %}
             <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ result.personName }}</td>
@@ -83,7 +99,7 @@
       <h3>4x4x4 Single</h3>
       <table class="table table-sm">
         <tbody>
-          {% for result in single_444 %}
+          {% for result in all_rankings.single_444 %}
             <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ result.personName }}</td>
@@ -97,7 +113,7 @@
       <h3>4x4x4 Average</h3>
       <table class="table table-sm">
         <tbody>
-          {% for result in average_444 %}
+          {% for result in all_rankings.average_444 %}
             <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ result.personName }}</td>
@@ -114,7 +130,7 @@
       <h3>5x5x5 Single</h3>
       <table class="table table-sm">
         <tbody>
-          {% for result in single_555 %}
+          {% for result in all_rankings.single_555 %}
             <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ result.personName }}</td>
@@ -128,7 +144,7 @@
       <h3>5x5x5 Average</h3>
       <table class="table table-sm">
         <tbody>
-          {% for result in average_555 %}
+          {% for result in all_rankings.average_555 %}
             <tr>
               <td>{{ forloop.counter }}</td>
               <td>{{ result.personName }}</td>

@@ -1,3 +1,13 @@
+"""Cubing"""
+
+RANK_TYPES = ['best', 'average']
+AREAS = ['national', 'regional', 'cityprovincial']
+EVENTS = [
+    '222', '333', '333bf', '333fm', '333ft', '333mbf', '333mbo', '333oh',
+    '444', '444bf', '555', '555bf', '666', '777', 'clock', 'magic', 'minx',
+    'mmagic', 'pyram', 'skewb', 'sq1',
+]
+
 """Regions"""
 
 NCR = 'NCR'
