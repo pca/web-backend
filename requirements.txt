@@ -1,6 +1,7 @@
 Django==2.0
 django-rq==1.0.1
 PyMySQL==0.8.0
+raven==6.6.0
 redis==2.10.6
 requests==2.18.4
 rq==0.10.0
