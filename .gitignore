@@ -2,4 +2,6 @@
 .env
 production.env
 production.yml
+staging.env
+staging.yml
 venv/
