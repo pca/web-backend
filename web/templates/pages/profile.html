@@ -62,7 +62,12 @@
       var initial_region = '{{ form.region.value }}';
       var initial_city_province = '{{ form.city_province.value }}';
 
-      var initial_cities_provinces = CITIES_PROVINCES_DIRECTORY[initial_region]['cities_provinces'];
+      var initial_cities_provinces = CITIES_PROVINCES_DIRECTORY[initial_region];
+
+      // Only access 'cities_provinces' if initial_region is existing
+      if (initial_cities_provinces) {
+        initial_cities_provinces = initial_cities_provinces['cities_provinces'];
+      }
 
       // Insert initial cities/provinces within the initial region
       $.each(initial_cities_provinces, function(index, city_province) {
