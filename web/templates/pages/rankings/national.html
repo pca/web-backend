@@ -2,144 +2,75 @@
 {% load static %}
 
 {% block content %}
-  <div class="row mt-50">
+  <div class="row mt-50 mb-50">
     <div class="col">
-      <h1>National Ranking</h1>
-    </div>
-  </div>
-  <div class="row mt-30">
-    <div class="col-3">
-      <img class="rotate45 align-middle" src="{% static '3x3x3.svg' %}" style="margin-top: 37%">
-    </div>
-    <div class="col">
-      <h3>3x3x3 Single</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in single_333 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.best }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col">
-      <h3>3x3x3 Average</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in average_333 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.average }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <hr>
-  <div class="row mt-30">
-    <div class="col">
-      <h3>2x2x2 Single</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in single_222 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.best }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col">
-      <h3>2x2x2 Average</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in average_222 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.average }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col-3">
-      <img class="rotate45 align-middle" src="{% static '2x2x2.svg' %}" style="margin-top: 37%">
-    </div>
-  </div>
-  <hr>
-  <div class="row mt-30">
-    <div class="col-3">
-      <img class="rotate45 align-middle" src="{% static '4x4x4.svg' %}" style="margin-top: 37%">
-    </div>
-    <div class="col">
-      <h3>4x4x4 Single</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in single_444 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.best }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col">
-      <h3>4x4x4 Average</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in average_444 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.average }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <hr>
-  <div class="row mt-30 mb-50">
-    <div class="col">
-      <h3>5x5x5 Single</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in single_555 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.best }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col">
-      <h3>5x5x5 Average</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in average_555 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.average }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col-3">
-      <img class="rotate45 align-middle" src="{% static '5x5x5.svg' %}" style="margin-top: 37%">
+      <h3>National Ranking</h3>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h3>3x3x3 Single</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_333 %}
+        </div>
+        <div class="col">
+          <h3>3x3x3 Average</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_333 %}
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h3>2x2x2 Single</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_222 %}
+        </div>
+        <div class="col">
+          <h3>2x2x2 Average</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_222 %}
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h3>4x4x4 Single</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_444 %}
+        </div>
+        <div class="col">
+          <h3>4x4x4 Average</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_444 %}
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h3>5x5x5 Single</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_555 %}
+        </div>
+        <div class="col">
+          <h3>5x5x5 Average</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_555 %}
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h3>6x6x6 Single</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_666 %}
+        </div>
+        <div class="col">
+          <h3>6x6x6 Average</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_666 %}
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h3>7x7x7 Single</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_777 %}
+        </div>
+        <div class="col">
+          <h3>7x7x7 Average</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_777 %}
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}

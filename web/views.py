@@ -94,14 +94,7 @@ class NationalRankingsView(ContentMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(NationalRankingsView, self).get_context_data(**kwargs)
-        context['single_222'] = get_rankings(event_type='222', rank_type='best')
-        context['single_333'] = get_rankings(event_type='333', rank_type='best')
-        context['single_444'] = get_rankings(event_type='444', rank_type='best')
-        context['single_555'] = get_rankings(event_type='555', rank_type='best')
-        context['average_222'] = get_rankings(event_type='222', rank_type='average')
-        context['average_333'] = get_rankings(event_type='333', rank_type='average')
-        context['average_444'] = get_rankings(event_type='444', rank_type='average')
-        context['average_555'] = get_rankings(event_type='555', rank_type='average')
+        context['all_rankings'] = get_all_rankings(area='national')
         return context
 
 
