@@ -15,7 +15,7 @@ services:
       - .:/app
   app_worker:
     build: .
-    command: rq worker --url=redis://redis:6379/0
+    command: python manage.py rqworker default
     env_file: development.env
     environment:
       PYTHONUNBUFFERED: 1

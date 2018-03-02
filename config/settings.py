@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_rq',
     'web',
     'wca',
 ]
@@ -145,3 +146,13 @@ WCA_API_URI = 'https://www.worldcubeassociation.org/api/v0/'
 WCA_CLIENT_ID = '6751d55b9b1cc5710fed3a47d9c69eca871af9b0f83ec5388a5b0cebe1f93037'
 WCA_CLIENT_SECRET = 'f0b4b7a0adc390a2584719625540f05b69295fdb9dd6ab0f31ecdb226741507b'
 WCA_CALLBACK = 'http://localhost:8000/wca/callback/'
+
+
+# RQ
+
+RQ_QUEUES = {
+    'default': {
+        'URL': os.getenv('REDIS_URL', 'redis://redis:6379/0'),
+        'DEFAULT_TIMEOUT': 600,
+    },
+}
