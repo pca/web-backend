@@ -11,7 +11,8 @@ from django.utils.crypto import get_random_string
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
-from web.constants import LOCATION_DIRECTORY, REGION_CHOICES, NCR
+from web.constants import LOCATION_DIRECTORY, REGION_CHOICES, CITIES_PROVINCES
+from web.constants import NCR, CITY_OF_MANILA
 from web.forms import PCAProfileForm
 from web.models import User, PCAProfile, WCAProfile
 from web.utils import get_rankings, get_all_rankings, wca_authorize_uri, wca_access_token_uri
@@ -109,12 +110,12 @@ class RegionalRankingsView(ContentMixin, TemplateView):
     page = 'rankings_regional'
 
     def get_context_data(self, **kwargs):
-        context = super(RegionalRankingsView, self).get_context_data(**kwargs)
         region_key = self.request.GET.get('region', NCR)
         region = LOCATION_DIRECTORY.get(region_key)
         # Validate region
         if not region:
             raise Http404
+        context = super(RegionalRankingsView, self).get_context_data(**kwargs)
         context['region'] = {
             'key': region_key,
             'label': region['label'],
@@ -129,15 +130,13 @@ class CityProvincialRankingsView(ContentMixin, TemplateView):
     page = 'rankings_cityprovincial'
 
     def get_context_data(self, **kwargs):
+        cityprovince = self.request.GET.get('cityprovince', CITY_OF_MANILA)
+        if cityprovince not in CITIES_PROVINCES:
+            raise Http404
         context = super(CityProvincialRankingsView, self).get_context_data(**kwargs)
-        context['single_222'] = get_rankings(event_type='222', rank_type='best', area='cityprovincial', area_filter='Laguna')
-        context['single_333'] = get_rankings(event_type='333', rank_type='best', area='cityprovincial', area_filter='Laguna')
-        context['single_444'] = get_rankings(event_type='444', rank_type='best', area='cityprovincial', area_filter='Laguna')
-        context['single_555'] = get_rankings(event_type='555', rank_type='best', area='cityprovincial', area_filter='Laguna')
-        context['average_222'] = get_rankings(event_type='222', rank_type='average', area='cityprovincial', area_filter='Laguna')
-        context['average_333'] = get_rankings(event_type='333', rank_type='average', area='cityprovincial', area_filter='Laguna')
-        context['average_444'] = get_rankings(event_type='444', rank_type='average', area='cityprovincial', area_filter='Laguna')
-        context['average_555'] = get_rankings(event_type='555', rank_type='average', area='cityprovincial', area_filter='Laguna')
+        context['cityprovince'] = cityprovince
+        context['cityprovince_choices'] = CITIES_PROVINCES
+        context['all_rankings'] = get_all_rankings(area='cityprovincial', area_filter=cityprovince)
         return context
 
 

@@ -307,7 +307,7 @@ REGION_CHOICES = [(key, region['label']) for key, region in LOCATION_DIRECTORY.i
 
 CITIES_PROVINCES = []
 for key, region in LOCATION_DIRECTORY.items():
-    CITIES_PROVINCES.append(region['cities_provinces'])
+    CITIES_PROVINCES += region['cities_provinces']
 
 CITY_PROVINCE_CHOICES = []
 for key, region in LOCATION_DIRECTORY.items():
