@@ -140,12 +140,12 @@ AUTH_USER_MODEL = 'web.User'
 
 # WCA
 
-WCA_OAUTH_URI = 'https://www.worldcubeassociation.org/oauth/'
-WCA_API_URI = 'https://www.worldcubeassociation.org/api/v0/'
+WCA_OAUTH_URI = os.getenv('WCA_OAUTH_URI')
+WCA_API_URI = os.getenv('WCA_API_URI')
 
-WCA_CLIENT_ID = '6751d55b9b1cc5710fed3a47d9c69eca871af9b0f83ec5388a5b0cebe1f93037'
-WCA_CLIENT_SECRET = 'f0b4b7a0adc390a2584719625540f05b69295fdb9dd6ab0f31ecdb226741507b'
-WCA_CALLBACK = 'http://localhost:8000/wca/callback/'
+WCA_CLIENT_ID = os.getenv('WCA_CLIENT_ID')
+WCA_CLIENT_SECRET = os.getenv('WCA_CLIENT_SECRET')
+WCA_CALLBACK = os.getenv('WCA_CALLBACK')
 
 
 # RQ
