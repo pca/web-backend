@@ -110,11 +110,15 @@ class RegionalRankingsView(ContentMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(RegionalRankingsView, self).get_context_data(**kwargs)
-        region = self.request.GET.get('region', NCR)
+        region_key = self.request.GET.get('region', NCR)
+        region = LOCATION_DIRECTORY.get(region_key)
         # Validate region
-        if not LOCATION_DIRECTORY.get(region):
+        if not region:
             raise Http404
-        context['region'] = region
+        context['region'] = {
+            'key': region_key,
+            'label': region['label'],
+        }
         context['region_choices'] = REGION_CHOICES
         context['all_rankings'] = get_all_rankings(area='regional', area_filter=region)
         return context

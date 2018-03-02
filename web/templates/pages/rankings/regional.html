@@ -2,160 +2,83 @@
 {% load static %}
 
 {% block content %}
-  <div class="row">
+  <div class="row mt-50 mb-50">
     <div class="col">
-      <div class="dropdown clearfix">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownRegionMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          {{ region }}
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownRegionMenu">
-          {% for region_choice in region_choices %}
-            {% if not region == region_choice.0 %}
-              <a class="dropdown-item" href="{% url 'web:regional_rankings' %}?region={{ region_choice.0 }}">{{ region_choice.0 }} - {{ region_choice.1 }}</a>
-            {% endif %}
-          {% endfor %}
-        </div>
+      <h3>Regions</h3>
+      <div class="list-group">
+        {% for region_choice in region_choices %}
+          <a href="{% url 'web:regional_rankings' %}?region={{ region_choice.0 }}" class="list-group-item list-group-item-action{% if region.key == region_choice.0 %} active{% endif %}">{{ region_choice.0 }}</a>
+        {% endfor %}
       </div>
     </div>
-  </div>
-  <div class="row mt-50">
-    <div class="col">
-      <h1>Regional Ranking ({{ region }})</h1>
-    </div>
-  </div>
-  <div class="row mt-30">
-    <div class="col-3">
-      <img class="rotate45 align-middle" src="{% static '3x3x3.svg' %}" style="margin-top: 37%">
-    </div>
-    <div class="col">
-      <h3>3x3x3 Single</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in all_rankings.single_333 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.best }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col">
-      <h3>3x3x3 Average</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in all_rankings.average_333 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.average }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <hr>
-  <div class="row mt-30">
-    <div class="col">
-      <h3>2x2x2 Single</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in all_rankings.single_222 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.best }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col">
-      <h3>2x2x2 Average</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in all_rankings.average_222 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.average }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col-3">
-      <img class="rotate45 align-middle" src="{% static '2x2x2.svg' %}" style="margin-top: 37%">
-    </div>
-  </div>
-  <hr>
-  <div class="row mt-30">
-    <div class="col-3">
-      <img class="rotate45 align-middle" src="{% static '4x4x4.svg' %}" style="margin-top: 37%">
-    </div>
-    <div class="col">
-      <h3>4x4x4 Single</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in all_rankings.single_444 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.best }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col">
-      <h3>4x4x4 Average</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in all_rankings.average_444 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.average }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <hr>
-  <div class="row mt-30 mb-50">
-    <div class="col">
-      <h3>5x5x5 Single</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in all_rankings.single_555 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.best }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col">
-      <h3>5x5x5 Average</h3>
-      <table class="table table-sm">
-        <tbody>
-          {% for result in all_rankings.average_555 %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ result.personName }}</td>
-              <td>{{ result.average }}s</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col-3">
-      <img class="rotate45 align-middle" src="{% static '5x5x5.svg' %}" style="margin-top: 37%">
+    <div class="col-10">
+      <h3>Regional Ranking ({{ region.label }})</h3>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h3>3x3x3 Single</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_333 %}
+        </div>
+        <div class="col">
+          <h3>3x3x3 Average</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_333 %}
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h3>2x2x2 Single</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_222 %}
+        </div>
+        <div class="col">
+          <h3>2x2x2 Average</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_222 %}
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h3>4x4x4 Single</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_444 %}
+        </div>
+        <div class="col">
+          <h3>4x4x4 Average</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_444 %}
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h3>5x5x5 Single</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_555 %}
+        </div>
+        <div class="col">
+          <h3>5x5x5 Average</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_555 %}
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h3>6x6x6 Single</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_666 %}
+        </div>
+        <div class="col">
+          <h3>6x6x6 Average</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_666 %}
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h3>7x7x7 Single</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_777 %}
+        </div>
+        <div class="col">
+          <h3>7x7x7 Average</h3>
+          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_777 %}
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}

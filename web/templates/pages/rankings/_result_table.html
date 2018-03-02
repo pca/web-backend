@@ -1,0 +1,15 @@
+<table class="table table-sm">
+  <tbody>
+    {% for result in rankings %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ result.personName }}</td>
+        <td>{{ result.best }}s</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="3" class="text-center">(No records found)</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
