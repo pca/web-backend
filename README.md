@@ -16,7 +16,7 @@ This is the new PCA web repo written in python. You can checkout our old [PCA we
 All official competition records and data are owned by [the WCA (World Cube Assocation)](https://www.worldcubeassociation.org).
 No official record has been tampered/modified.
 
-## Development Setup
+## Setup
 
 ### Requirements
 
@@ -25,25 +25,29 @@ No official record has been tampered/modified.
 
 ### Setup
 
-1. Build:
+1. Setup configuration depending on the environment you're in. Make a copy of `docker-compose.yml` and `development.env` and rename it (e.g. `production.yml` and `production.env` for production setup). Modify the config files depending on your needs. Set COMPOSE_FILE environment variable to the compose file you are working on so that `Makefile` can load it.
 
 ```
-$ docker-compose build
+$ export COMPOSE_FILE=production.yml
 ```
 
-2. Migrate
+2. Build the containers.
 
 ```
-$ docker-compose exec app python manage.py migrate
+$ make build
 ```
 
-3. Run
+3. Run the containers.
 
 ```
-$ docker-compose up -d
+$ make run
 ```
 
-4 Open the web app using http://localhost:8000
+3. Run migrations.
+
+```
+$ make migrate
+```
 
 ## Developers
 
