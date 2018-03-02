@@ -15,7 +15,8 @@ from web.constants import LOCATION_DIRECTORY, REGION_CHOICES, CITIES_PROVINCES
 from web.constants import NCR, CITY_OF_MANILA
 from web.forms import PCAProfileForm
 from web.models import User, PCAProfile, WCAProfile
-from web.utils import get_rankings, get_all_rankings, wca_authorize_uri, wca_access_token_uri
+from web.utils import get_all_rankings, enqueue_ranking_computation
+from web.utils import wca_authorize_uri, wca_access_token_uri
 
 
 class AuthenticateMixin:
@@ -56,10 +57,28 @@ class ProfileView(AuthenticateMixin, ContentMixin, TemplateView):
     template_name = 'pages/profile.html'
     page = 'profile'
 
+    def get(self, request, *args, **kwargs):
+        request.session['profile_region'] = request.user.pcaprofile.region
+        request.session['profile_city_province'] = request.user.pcaprofile.city_province
+        return super(ProfileView, self).get(self, request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         form = PCAProfileForm(request.POST, instance=request.user.pcaprofile)
         if form.is_valid():
             form.save()
+            # Check for updated region/city/province data
+            previous_region = request.session.get('profile_region')
+            updated_region = form.cleaned_data.get('region')
+            if previous_region != updated_region:
+                # Recompute regional rankings
+                enqueue_ranking_computation(area='regional', area_filter=previous_region)
+                enqueue_ranking_computation(area='regional', area_filter=updated_region)
+            previous_city_province = request.session.get('profile_city_province')
+            updated_city_province = form.cleaned_data.get('city_province')
+            if previous_city_province != updated_city_province:
+                # Recompute city/provincial rankings
+                enqueue_ranking_computation(area='cityprovincial', area_filter=previous_city_province)
+                enqueue_ranking_computation(area='cityprovincial', area_filter=updated_city_province)
         return redirect('web:profile')
 
     def get_context_data(self, **kwargs):

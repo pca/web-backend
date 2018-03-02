@@ -1,6 +1,7 @@
 import json
 import redis
 
+import django_rq as q
 from django.conf import settings
 from django.db.models import Q
 
@@ -39,9 +40,9 @@ def get_all_rankings(area='regional', area_filter=None):
     return all_rankings
 
 
-def get_rankings(event_type='333', rank_type='best', area='national', area_filter=None, num=10):
+def get_rankings(event_type='333', rank_type='best', area='national', area_filter=None, limit=10):
     """
-    Returns the top `num` records.
+    Returns the top `limit` records.
     rank_type can be 'best' or 'average'.
     area can be `national`, `regional`, or `cityprovincial'.
     area_filter are choice valies defined in web.constants
@@ -70,7 +71,7 @@ def get_rankings(event_type='333', rank_type='best', area='national', area_filte
     """
 
     # Try to fetch result from cache
-    key = '{}{}{}{}{}'.format(event_type, rank_type, area, area_filter, num)
+    key = '{}{}{}{}{}'.format(event_type, rank_type, area, area_filter, limit)
     top_results_in_string = r.get(key)
 
     if top_results_in_string:
@@ -82,18 +83,7 @@ def get_rankings(event_type='333', rank_type='best', area='national', area_filte
         area=area,
         area_filter=area_filter,
     )
-
-    # Filter results by top ten and without repeating
-    # person (Only the best record for 1 person)
-    top_results = []
-    personsIds = []
-
-    for result in results:
-        if len(top_results) == num:
-            break
-        if result.personId not in personsIds:
-            personsIds.append(result.personId)
-            top_results.append(result.to_dict())
+    top_results = limit_records(results, limit=limit)
 
     # Cache result
     top_results_in_string = json.dumps(top_results)
@@ -128,3 +118,37 @@ def query_records(event_type='333', rank_type='best', area='national', area_filt
         gt_query[rank_type],
         area_query
     ).order_by(rank_type)
+
+
+def limit_records(records, limit=10):
+    # Limit results by top `limit` and without repeating
+    # person (Only the best record for 1 person)
+    top_results = []
+    personsIds = []
+
+    for result in records:
+        if len(top_results) == limit:
+            break
+        if result.personId not in personsIds:
+            personsIds.append(result.personId)
+            top_results.append(result.to_dict())
+
+    return top_results
+
+
+def recompute_rankings(area='national', area_filter=None, limit=10):
+    for event in EVENTS:
+        # Singles
+        single_records = query_records(event_type=event, rank_type='best', area=area, area_filter=area_filter)
+        single_records = limit_records(single_records, limit=limit)
+        key = '{}{}{}{}{}'.format(event, 'best', area, area_filter, limit)
+        r.set(key, json.dumps(single_records))
+        # Average
+        average_records = query_records(event_type=event, rank_type='average', area=area, area_filter=area_filter)
+        average_records = limit_records(average_records, limit=limit)
+        key = '{}{}{}{}{}'.format(event, 'average', area, area_filter, limit)
+        r.set(key, json.dumps(average_records))
+
+
+def enqueue_ranking_computation(area='national', area_filter=None, limit=10):
+    q.enqueue(recompute_rankings, area, area_filter, limit)
