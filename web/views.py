@@ -11,7 +11,7 @@ from django.utils.crypto import get_random_string
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
-from web.constants import CITIES_PROVINCES_DIRECTORY
+from web.constants import LOCATION_DIRECTORY
 from web.forms import PCAProfileForm
 from web.models import User, PCAProfile, WCAProfile
 from web.utils import get_rankings, wca_authorize_uri, wca_access_token_uri
@@ -64,7 +64,7 @@ class ProfileView(AuthenticateMixin, ContentMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(ProfileView, self).get_context_data(**kwargs)
         context['form'] = PCAProfileForm(instance=self.request.user.pcaprofile)
-        context['cities_provinces_directory'] = CITIES_PROVINCES_DIRECTORY
+        context['location_directory'] = LOCATION_DIRECTORY
         return context
 
 

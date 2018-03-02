@@ -57,16 +57,16 @@
 {% block scripts %}
   <script>
     $(document).ready(function() {
-      var CITIES_PROVINCES_DIRECTORY = {{ cities_provinces_directory|safe }};
+      var CITIES_PROVINCES_DIRECTORY = {{ location_directory|safe }};
 
       var initial_region = '{{ form.region.value }}';
       var initial_city_province = '{{ form.city_province.value }}';
 
-      var initial_cities_provinces = CITIES_PROVINCES_DIRECTORY[initial_region];
+      var initial_cities_provinces = CITIES_PROVINCES_DIRECTORY[initial_region]['cities_provinces'];
 
       // Insert initial cities/provinces within the initial region
       $.each(initial_cities_provinces, function(index, city_province) {
-        $('#id_city_province').append('<option value="' + city_province[0] + '" selected>' + city_province[1] + '</option>');
+        $('#id_city_province').append('<option value="' + city_province + '" selected>' + city_province + '</option>');
       })
 
       // Set current city/province
@@ -77,14 +77,14 @@
         $('#id_city_province').empty();
 
         var region = $(this).val();
-        var cities_provinces = CITIES_PROVINCES_DIRECTORY[region];
+        var cities_provinces = CITIES_PROVINCES_DIRECTORY[region]['cities_provinces'];
 
         // Insert blank option
         $('#id_city_province').append('<option value="" selected>---------</option>');
 
         // Insert cities/provinces within the selected region
         $.each(cities_provinces, function(index, city_province) {
-          $('#id_city_province').append('<option value="' + city_province[0] + '" selected>' + city_province[1] + '</option>');
+          $('#id_city_province').append('<option value="' + city_province + '" selected>' + city_province + '</option>');
         })
 
         // Set default selected city/province to blank

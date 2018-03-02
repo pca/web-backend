@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from web.constants import REGIONS, CITIES_PROVINCES
+from web.constants import REGION_CHOICES, CITY_PROVINCE_CHOICES
 
 
 class User(AbstractUser):
@@ -34,8 +34,8 @@ class PCAProfile(models.Model):
         return str(self.user)
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    region = models.CharField(max_length=255, choices=REGIONS, null=True, blank=True)
-    city_province = models.CharField(max_length=255, choices=CITIES_PROVINCES, null=True, blank=True, verbose_name='City/Province')
+    region = models.CharField(max_length=255, choices=REGION_CHOICES, null=True, blank=True)
+    city_province = models.CharField(max_length=255, choices=CITY_PROVINCE_CHOICES, null=True, blank=True, verbose_name='City/Province')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
