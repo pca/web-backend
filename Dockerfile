@@ -6,6 +6,3 @@ RUN apk add mysql-client
 WORKDIR /app
 ADD requirements.txt /app
 RUN pip install -r requirements.txt
-
-RUN mkdir /data
-ADD data/* /data/
