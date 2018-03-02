@@ -9,8 +9,11 @@ run:
 stop:
 	docker-compose -f ${COMPOSE_FILE} stop
 
+rm:
+	docker-compose -f ${COMPOSE_FILE} rm -f
+
 logs:
-	docker-compose -f ${COMPOSE_FILE} logs -f --tail 250 app
+	docker-compose -f ${COMPOSE_FILE} logs -f --tail 250 app app_worker
 
 migrations:
 	docker-compose -f ${COMPOSE_FILE} exec app python manage.py makemigrations
@@ -23,3 +26,6 @@ shell:
 
 superuser:
 	docker-compose -f ${COMPOSE_FILE} exec app python manage.py createsuperuser
+
+testsentry:
+	docker-compose -f ${COMPOSE_FILE} exec app python manage.py raven test
