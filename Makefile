@@ -1,23 +1,25 @@
+COMPOSE_FILE?=docker-compose.yml
+
 build:
-	docker-compose build
+	docker-compose -f ${COMPOSE_FILE} build
 
 run:
-	docker-compose up -d
+	docker-compose -f ${COMPOSE_FILE} up -d
 
 stop:
-	docker-compose stop
+	docker-compose -f ${COMPOSE_FILE} stop
 
 logs:
-	docker-compose logs -f --tail 250 app
+	docker-compose -f ${COMPOSE_FILE} logs -f --tail 250 app
 
 migrations:
-	docker-compose exec app python manage.py makemigrations
+	docker-compose -f ${COMPOSE_FILE} exec app python manage.py makemigrations
 
 migrate:
-	docker-compose exec app python manage.py migrate
+	docker-compose -f ${COMPOSE_FILE} exec app python manage.py migrate
 
 shell:
-	docker-compose exec app python manage.py shell
+	docker-compose -f ${COMPOSE_FILE} exec app python manage.py shell
 
 superuser:
-	docker-compose exec app python manage.py createsuperuser
+	docker-compose -f ${COMPOSE_FILE} exec app python manage.py createsuperuser
