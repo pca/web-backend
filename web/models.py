@@ -46,6 +46,7 @@ class DatabaseConfig(models.Model):
     wca1 to wca2 databases.
     """
     active_database = models.CharField(max_length=100)
+    inactive_database = models.CharField(max_length=100)
 
     def __str__(self):
         return self.active_database
