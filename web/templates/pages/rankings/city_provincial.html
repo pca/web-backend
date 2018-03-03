@@ -14,71 +14,7 @@
     <div class="col-9">
       <h3>City/Provincial Ranking ({{ cityprovince }})</h3>
       <hr>
-      <div class="row">
-        <div class="col">
-          <h3>3x3x3 Single</h3>
-          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_333 result_type='single' %}
-        </div>
-        <div class="col">
-          <h3>3x3x3 Average</h3>
-          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_333 result_type='average' %}
-        </div>
-      </div>
-      <hr>
-      <div class="row">
-        <div class="col">
-          <h3>2x2x2 Single</h3>
-          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_222 result_type='single' %}
-        </div>
-        <div class="col">
-          <h3>2x2x2 Average</h3>
-          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_222 result_type='average' %}
-        </div>
-      </div>
-      <hr>
-      <div class="row">
-        <div class="col">
-          <h3>4x4x4 Single</h3>
-          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_444 result_type='single' %}
-        </div>
-        <div class="col">
-          <h3>4x4x4 Average</h3>
-          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_444 result_type='average' %}
-        </div>
-      </div>
-      <hr>
-      <div class="row">
-        <div class="col">
-          <h3>5x5x5 Single</h3>
-          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_555 result_type='single' %}
-        </div>
-        <div class="col">
-          <h3>5x5x5 Average</h3>
-          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_555 result_type='average' %}
-        </div>
-      </div>
-      <hr>
-      <div class="row">
-        <div class="col">
-          <h3>6x6x6 Single</h3>
-          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_666 result_type='single' %}
-        </div>
-        <div class="col">
-          <h3>6x6x6 Average</h3>
-          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_666 result_type='average' %}
-        </div>
-      </div>
-      <hr>
-      <div class="row">
-        <div class="col">
-          <h3>7x7x7 Single</h3>
-          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.single_777 result_type='single' %}
-        </div>
-        <div class="col">
-          <h3>7x7x7 Average</h3>
-          {% include 'pages/rankings/_result_table.html' with rankings=all_rankings.average_777 result_type='average' %}
-        </div>
-      </div>
+      {% include 'pages/rankings/_events.html' %}
     </div>
   </div>
 {% endblock %}
