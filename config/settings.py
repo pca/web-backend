@@ -148,6 +148,8 @@ WCA_CLIENT_ID = os.getenv('WCA_CLIENT_ID')
 WCA_CLIENT_SECRET = os.getenv('WCA_CLIENT_SECRET')
 WCA_CALLBACK = os.getenv('WCA_CALLBACK')
 
+WCA_EXPORT_URL = 'https://www.worldcubeassociation.org/results/misc/WCA_export.sql.zip'
+
 
 # RQ
 
