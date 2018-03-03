@@ -80,6 +80,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(),
+    'wca1': dj_database_url.parse(os.getenv('WCA1_DATABASE_URL')),
+    'wca2': dj_database_url.parse(os.getenv('WCA2_DATABASE_URL')),
 }
 
 
