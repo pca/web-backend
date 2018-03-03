@@ -1,7 +1,11 @@
 import json
-import redis
+import requests
+import shutil
+import subprocess
+import zipfile
 
 import django_rq as q
+import redis
 from django.conf import settings
 from django.db.models import Q
 
@@ -115,11 +119,7 @@ def query_records(event_type='333', rank_type='best', area='national', area_filt
         area_query &= Q(personId__in=wca_ids)
 
     # Fetch from the active wca database
-    active_db = r.get('active_db').decode('utf-8')
-    if not active_db:
-        active_db = DatabaseConfig.db()
-        r.set('active_db', active_db.encode('utf-8'))
-
+    active_db = get_db_config()['active']
     return Result.objects.using(active_db).filter(
         gt_query[rank_type],
         area_query
@@ -142,6 +142,15 @@ def limit_records(records, limit=10):
     return top_results
 
 
+def get_db_config():
+    db_config = r.get('db_config')
+    if not db_config:
+        db_config = DatabaseConfig.db().to_dict()
+        r.set('db_config', json.dumps(db_config))
+        return db_config
+    return json.loads(db_config)
+
+
 def recompute_rankings(area='national', area_filter=None, limit=10):
     for event in EVENTS:
         # Singles
@@ -158,3 +167,49 @@ def recompute_rankings(area='national', area_filter=None, limit=10):
 
 def enqueue_ranking_computation(area='national', area_filter=None, limit=10):
     q.enqueue(recompute_rankings, area, area_filter, limit)
+
+
+def sync_wca_database():
+    # TODO: Schedule this method every 1am
+    data_location = 'data/'
+    zip_location = data_location + 'WCA_export.sql.zip'
+    sql_location = data_location + 'WCA_export.sql'
+
+    # Download the latest database dump
+    r = requests.get(settings.WCA_EXPORT_URL, stream=True)
+    with open(zip_location, 'wb') as f:
+        shutil.copyfileobj(r.raw, f)
+
+    # Extract zip file
+    zip_ref = zipfile.ZipFile(zip_location, 'r')
+    zip_ref.extractall(data_location)
+    zip_ref.close()
+
+    # Import the database dump to the inactive table
+    db_config = get_db_config()
+    db_django_config = settings.DATABASES[db_config['inactive']]
+    proc = subprocess.Popen(
+        [
+            'mysql',
+            '-u', db_django_config['USER'],
+            '--password={}'.format(db_django_config['PASSWORD']),
+            '-h', db_django_config['HOST'],
+            db_config['inactive'],
+        ],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        encoding='utf8',
+    )
+    f = open(sql_location, 'r')
+    out, err = proc.communicate(f.read())
+
+    # TODO: Create missing primary key (id) on Results table
+
+    # Update database config
+    db = DatabaseConfig.db()
+    db.active_database = db_config['inactive']
+    db.inactive_database = db_config['active']
+    db.save()
+
+    # Delete cached database config
+    r.delete('db_config')

@@ -53,5 +53,10 @@ class DatabaseConfig(models.Model):
 
     @classmethod
     def db(self):
-        config = self.objects.first()
-        return config.active_database
+        return self.objects.first()
+
+    def to_dict(self):
+        return {
+            'active': self.active_database,
+            'inactive': self.inactive_database,
+        }
