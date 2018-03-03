@@ -39,3 +39,18 @@ class PCAProfile(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class DatabaseConfig(models.Model):
+    """A singleton database config record for switching from
+    wca1 to wca2 databases.
+    """
+    active_database = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.active_database
+
+    @classmethod
+    def db(self):
+        config = self.objects.first()
+        return config.active_database
