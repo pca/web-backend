@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db.models import Q
 
 from wca.models import Result
-from web.models import WCAProfile
+from web.models import WCAProfile, DatabaseConfig
 from web.constants import EVENTS
 
 r = redis.StrictRedis.from_url(settings.REDIS_URL)
@@ -114,7 +114,13 @@ def query_records(event_type='333', rank_type='best', area='national', area_filt
         wca_ids = [p.wca_id for p in profiles if p.wca_id]  # Get WCA IDs of registered profiles
         area_query &= Q(personId__in=wca_ids)
 
-    return Result.objects.filter(
+    # Fetch from the active wca database
+    active_db = r.get('active_db').decode('utf-8')
+    if not active_db:
+        active_db = DatabaseConfig.db()
+        r.set('active_db', active_db.encode('utf-8'))
+
+    return Result.objects.using(active_db).filter(
         gt_query[rank_type],
         area_query
     ).order_by(rank_type)
