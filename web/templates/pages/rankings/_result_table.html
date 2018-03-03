@@ -4,7 +4,7 @@
     {% for result in rankings %}
       <tr>
         <td>{{ forloop.counter }}</td>
-        <td>{{ result.personName }}</td>
+        <td><a href="https://www.worldcubeassociation.org/persons/{{ result.personId }}">{{ result.personName }}</a></td>
         {% if result_type == 'single' %}
           <td>{{ result.best|timeformat }}s</td>
         {% elif result_type == 'average' %}
