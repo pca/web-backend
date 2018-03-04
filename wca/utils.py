@@ -25,11 +25,12 @@ def wca_authorize_uri(host):
     return authorize_uri
 
 
-def wca_access_token_uri(code):
+def wca_access_token_uri(host, code):
+    redirect_uri = 'http://' + host + settings.WCA_CALLBACK_PATH
     access_token_uri = settings.WCA_OAUTH_URI + 'token/'
     access_token_uri += '?client_id=' + settings.WCA_CLIENT_ID
     access_token_uri += '&client_secret=' + settings.WCA_CLIENT_SECRET
-    access_token_uri += '&redirect_uri=' + settings.WCA_CALLBACK
+    access_token_uri += '&redirect_uri=' + redirect_uri
     access_token_uri += '&code=' + code
     access_token_uri += '&grant_type=authorization_code'
     return access_token_uri

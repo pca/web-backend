@@ -164,7 +164,8 @@ class WCACallbackView(RedirectView):
         print('WCA Callback: {}'.format(data))
 
         # Get access token
-        access_token_uri = wca_access_token_uri(code)
+        host = self.request.get_host()
+        access_token_uri = wca_access_token_uri(host, code)
         response = requests.post(access_token_uri)
         access_token = response.json().get('access_token')
 
