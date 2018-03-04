@@ -11,12 +11,12 @@ from django.utils.crypto import get_random_string
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
+from wca.utils import get_all_rankings, enqueue_ranking_computation
+from wca.utils import wca_authorize_uri, wca_access_token_uri
 from web.constants import LOCATION_DIRECTORY, REGION_CHOICES, CITIES_PROVINCES
 from web.constants import NCR, CITY_OF_MANILA
 from web.forms import PCAProfileForm
 from web.models import User, PCAProfile, WCAProfile
-from web.utils import get_all_rankings, enqueue_ranking_computation
-from web.utils import wca_authorize_uri, wca_access_token_uri
 
 
 class AuthenticateMixin:
