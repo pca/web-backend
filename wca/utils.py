@@ -16,10 +16,11 @@ from web.constants import EVENTS
 r = redis.StrictRedis.from_url(settings.REDIS_URL)
 
 
-def wca_authorize_uri():
+def wca_authorize_uri(host):
+    redirect_uri = 'http://' + host + settings.WCA_CALLBACK_PATH
     authorize_uri = settings.WCA_OAUTH_URI + 'authorize/'
     authorize_uri += '?client_id=' + settings.WCA_CLIENT_ID
-    authorize_uri += '&redirect_uri=' + settings.WCA_CALLBACK
+    authorize_uri += '&redirect_uri=' + redirect_uri
     authorize_uri += '&response_type=code&scope='
     return authorize_uri
 

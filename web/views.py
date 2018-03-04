@@ -39,7 +39,8 @@ class ContentMixin:
 
     def get_context_data(self, **kwargs):
         context = super(ContentMixin, self).get_context_data(**kwargs)
-        context['wca_login_uri'] = wca_authorize_uri()
+        host = self.request.get_host()
+        context['wca_login_uri'] = wca_authorize_uri(host)
         context['page'] = self.page
         return context
 

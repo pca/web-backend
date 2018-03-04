@@ -139,7 +139,7 @@ WCA_API_URI = os.getenv('WCA_API_URI')
 
 WCA_CLIENT_ID = os.getenv('WCA_CLIENT_ID')
 WCA_CLIENT_SECRET = os.getenv('WCA_CLIENT_SECRET')
-WCA_CALLBACK = os.getenv('WCA_CALLBACK')
+WCA_CALLBACK_PATH = os.getenv('WCA_CALLBACK_PATH')
 
 WCA_EXPORT_URL = 'https://www.worldcubeassociation.org/results/misc/WCA_export.sql.zip'
 
