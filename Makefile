@@ -21,6 +21,9 @@ migrations:
 migrate:
 	docker-compose -f ${COMPOSE_FILE} exec app python manage.py migrate
 
+dbconfig:
+	docker-compose -f ${COMPOSE_FILE} exec app python manage.py loaddata database_config
+
 shell:
 	docker-compose -f ${COMPOSE_FILE} exec app python manage.py shell
 
