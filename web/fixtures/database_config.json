@@ -1,0 +1,10 @@
+[
+    {
+        "model": "web.databaseconfig",
+        "pk": 1,
+        "fields": {
+            "active_database": "wca1",
+            "inactive_database": "wca2"
+        }
+    }
+]
