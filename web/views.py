@@ -12,7 +12,7 @@ from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
 from wca.utils import get_all_rankings, enqueue_ranking_computation
-from wca.utils import wca_authorize_uri, wca_access_token_uri
+from wca.utils import wca_authorize_uri, wca_access_token_uri, get_competitions
 from web.constants import LOCATION_DIRECTORY, REGION_CHOICES, CITIES_PROVINCES
 from web.constants import NCR, CITY_OF_MANILA
 from web.forms import PCAProfileForm
@@ -94,9 +94,7 @@ class CompetitionsView(ContentMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(CompetitionsView, self).get_context_data(**kwargs)
-        # Fetch competitions in the philippines
-        response = requests.get('https://www.worldcubeassociation.org/api/v0/search/competitions?q=philippines')
-        competitions = response.json()['result']
+        competitions = get_competitions()
         upcoming_competitions = []
         # Filter upcoming competitions
         for competition in competitions:

@@ -34,6 +34,19 @@ def wca_access_token_uri(code):
     return access_token_uri
 
 
+def get_competitions():
+    # Try to fetch data from cache
+    competitions = r.get('competitions')
+    if competitions:
+        return json.loads(competitions)
+    # Fetch competitions from the WCA API
+    response = requests.get('https://www.worldcubeassociation.org/api/v0/search/competitions?q=philippines')
+    competitions = response.json()['result']
+    # Cache the result for 10 minutes (600 seconds)
+    r.set('competitions', json.dumps(competitions), 600)
+    return competitions
+
+
 def get_all_rankings(area='regional', area_filter=None):
     all_rankings = {}
     for event in EVENTS:
