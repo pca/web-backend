@@ -1,7 +1,8 @@
-language: python
-python:
-  - "3.6"
-install:
-  - pip install -r requirements.txt
+sudo: required
+
+services:
+  - docker
+
 script:
-  - python manage.py test
+  - docker-compose build
+  - docker-compose run app python manage.py test
