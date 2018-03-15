@@ -3,6 +3,19 @@ sudo: required
 services:
   - docker
 
-script:
+before_script:
+  - sudo service mysql stop
+  - while sudo lsof -Pi :3306 -sTCP:LISTEN -t; do sleep 1; done
   - docker-compose build
+  - chmod 700 ./wait-for-it.sh
+
+script:
+  - docker-compose up -d mysql
+  - docker-compose up -d redis
+  - docker ps
   - docker-compose run app python manage.py test
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always
