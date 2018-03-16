@@ -1,7 +1,9 @@
 Philippine Cubers Association
 ===
+[![Build Status](https://travis-ci.org/pca/web-backend.svg?branch=master)](https://travis-ci.org/pca/web-backend)
 
-This is the new PCA web repo written in python. You can checkout our old [PCA web project](https://github.com/geocine/pinoycubers) written in PHP.
+This is the new PCA web repo written in python. 
+
 
 Live test server: [http://pinoycubers.org/](http://pinoycubers.org/)
 
