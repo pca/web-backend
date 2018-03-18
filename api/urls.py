@@ -15,7 +15,7 @@ urlpatterns = [
     path('competitions/', views.ListCompetitions.as_view(), name='competitions'),
 
     # Rankings
-    path('rankings/national', views.ListNationalRankings.as_view(), name='national_rankings'),
-    path('rankings/regional', views.ListRegionalRankings.as_view(), name='regional_rankings'),
-    path('rankings/cityprovincial', views.ListCityProvincialRankings.as_view(), name='cityprovincial_rankings'),
+    path('rankings/national/', views.ListNationalRankings.as_view(), name='national_rankings'),
+    path('rankings/regional/', views.ListRegionalRankings.as_view(), name='regional_rankings'),
+    path('rankings/cityprovincial/', views.ListCityProvincialRankings.as_view(), name='cityprovincial_rankings'),
 ]
