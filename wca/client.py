@@ -128,7 +128,7 @@ class WCAClient:
             return json.loads(top_results_in_string)
 
         results = self._query_records(event, rank_type, level, query=query)
-        top_results = self._sanitize_results(results, limit=limit)
+        top_results = self._sanitize_results(results, rank_type, limit=limit)
 
         # Cache result
         top_results_in_string = json.dumps(top_results)
@@ -192,13 +192,14 @@ class WCAClient:
         active_db = self._get_db_config()['active']
         return Result.objects.using(active_db).filter(db_query).order_by(rank_type)
 
-    def _sanitize_results(self, records, limit=10):
+    def _sanitize_results(self, records, rank_type, limit=10):
         """
         Limit results by top `limit` and without repeating
         person (Only the best record for 1 person).
 
         Args:
             records: The QuerySet queried from the database
+            rank_type: Rank type can be either be `best` (single) or `average`
             limit: The number of results
         """
         top_results = []
@@ -210,7 +211,8 @@ class WCAClient:
 
             if result.person_id not in persons_ids:
                 persons_ids.append(result.person_id)
-                top_results.append(result.to_dict())
+                data = result.to_dict(rank_type)
+                top_results.append(data)
 
         return top_results
 
@@ -227,13 +229,13 @@ class WCAClient:
         for event in self.events:
             # Singles
             single_records = self._query_records(event, 'best', level, query=query)
-            single_records = self._sanitize_results(single_records, limit=limit)
+            single_records = self._sanitize_results(single_records, 'best', limit=limit)
             key = '{}{}{}{}{}'.format(event, 'best', level, query, limit)
             r.set(key, json.dumps(single_records))
 
             # Average
             average_records = self._query_records(event, 'average', level, query=query)
-            average_records = self._sanitize_results(average_records, limit=limit)
+            average_records = self._sanitize_results(average_records, 'average', limit=limit)
             key = '{}{}{}{}{}'.format(event, 'average', level, query, limit)
             r.set(key, json.dumps(average_records))
 

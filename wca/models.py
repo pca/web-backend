@@ -139,25 +139,43 @@ class Result(models.Model):
         db_table = 'Results'
         managed = False
 
-    def to_dict(self):
+    @classmethod
+    def format_time(cls, time):
+        time = int(time)  # Ensure data type
+
+        if time == -1:
+            return 'DNF'
+        elif time == -2:
+            return 'DNS'
+        elif time > 0:
+            ms = time % 100
+            time -= ms
+            seconds = int((time % 6000) / 100)
+            minutes = int((time - (seconds * 100)) / 6000)
+
+            # Add 0 prefix if ms is 1 digit
+            if len(str(ms)) == 1:
+                ms = '0{}'.format(ms)
+
+            if minutes:
+                # Add 0 prefix if seconds is 1 digit
+                if len(str(seconds)) == 1:
+                    seconds = '0{}'.format(seconds)
+
+                return '{}:{}.{}'.format(minutes, seconds, ms)
+            return '{}.{}'.format(seconds, ms)
+
+        return time
+
+    def to_dict(self, rank_type):
+        time = getattr(self, rank_type)
+        time = Result.format_time(time)
         return {
             'competition_id': self.competition_id,
-            'event_id': self.event_id,
-            'round_type_id': self.round_type_id,
-            'pos': self.pos,
-            'best': self.best,
-            'average': self.average,
-            'person_name': self.person_name,
-            'person_id': self.person_id,
-            'person_country_id': self.person_country_id,
-            'format_id': self.format_id,
-            'value1': self.value1,
-            'value2': self.value2,
-            'value3': self.value3,
-            'value4': self.value4,
-            'value5': self.value5,
-            'regional_single_record': self.regional_single_record,
-            'regional_average_record': self.regional_average_record,
+            'event': self.event_id,
+            'time': time,
+            'name': self.person_name,
+            'wca_id': self.person_id,
         }
 
 
