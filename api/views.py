@@ -5,6 +5,7 @@ endpoint. It will also help people with less/zero knowledge of the framework
 contribute easily without knowing what those generic views are for.
 """
 import phgeograpy
+from django.http import Http404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -123,16 +124,52 @@ class ListNationalRankings(APIView):
 class ListRegionalRankings(APIView):
     """
     View to list the top 10 rankings of event(s) in regional level.
+
+    Args:
+        q: Filters the rankings by this given region.
+            `q` should be the region id.
     """
 
     def get(self, request, *args, **kwargs):
-        return Response({})
+        region = request.query_params.get('q')
+
+        if not region:
+            raise Http404
+
+        try:
+            region = phgeograpy.regions(region)
+        except Exception:
+            raise Http404
+
+        rankings = wca_client.all_rankings('regional', query=region)
+
+        data = {
+            'results': rankings,
+        }
+        return Response(data)
 
 
 class ListCityProvincialRankings(APIView):
     """
     View to list the top 10 rankings of event(s) in city/provincial level.
+    Cities are within Metro Manila and provinces excludes Metro Manila.
+
+    Args:
+        q: Filters the rankings by this given city/province.
+            `q` should be the city/province id.
     """
 
     def get(self, request, *args, **kwargs):
-        return Response({})
+        cityprovince = request.query_params.get('q')
+
+        if not cityprovince:
+            raise Http404
+
+        # TODO: Validate city/province id
+
+        rankings = wca_client.all_rankings('cityprovincial', query=cityprovince)
+
+        data = {
+            'results': rankings,
+        }
+        return Response(data)
