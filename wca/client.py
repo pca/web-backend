@@ -70,6 +70,44 @@ class WCAClient:
         )
         return access_token_uri
 
+    def competitions():
+        """
+        Returns the list of all upcoming competitions in the Philippines.
+        """
+        # Try to fetch data from cache
+        competitions = r.get('competitions')
+
+        if competitions:
+            return json.loads(competitions)
+
+        # Fetch competitions from the WCA API
+        response = requests.get('https://www.worldcubeassociation.org/api/v0/search/competitions?q=philippines')
+        competitions = response.json()['result']
+
+        # Cache the result for 10 minutes (600 seconds)
+        r.set('competitions', json.dumps(competitions), 600)
+
+        return competitions
+
+    def all_rankings(self, level, query=None, limit=10):
+        """
+        Returns ranking list of all available events.
+
+        Args:
+            level: Level can be `national`, `regional`, or `cityprovincial`
+            query: Can be a region code or cityprovincial code
+            limit: The number of results
+        """
+        all_rankings = {}
+
+        for event in self.events:
+            best_rankings = self.get_rankings(event, 'best', level, query=query, limit=limit)
+            average_rankings = self.get_rankings(event, 'average', level, query=query, limit=limit)
+            all_rankings['single_{}'.format(event)] = best_rankings
+            all_rankings['average_{}'.format(event)] = average_rankings
+
+        return all_rankings
+
     def rankings(self, event, rank_type, level, query=None, limit=10):
         """
         Lists the top `limit` records/rankings of a specific `event`,
