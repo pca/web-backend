@@ -195,7 +195,7 @@ class WCAClient:
     def _sanitize_results(self, records, limit=10):
         """
         Limit results by top `limit` and without repeating
-        person (Only the best record for 1 person)
+        person (Only the best record for 1 person).
 
         Args:
             records: The QuerySet queried from the database
@@ -226,13 +226,13 @@ class WCAClient:
         """
         for event in self.events:
             # Singles
-            single_records = self._query_records(event=event, rank_type='best', level=level, query=query)
+            single_records = self._query_records(event, 'best', level, query=query)
             single_records = self._sanitize_results(single_records, limit=limit)
             key = '{}{}{}{}{}'.format(event, 'best', level, query, limit)
             r.set(key, json.dumps(single_records))
 
             # Average
-            average_records = self._query_records(event=event, rank_type='average', level=level, query=query)
+            average_records = self._query_records(event, 'average', level, query=query)
             average_records = self._sanitize_results(average_records, limit=limit)
             key = '{}{}{}{}{}'.format(event, 'average', level, query, limit)
             r.set(key, json.dumps(average_records))

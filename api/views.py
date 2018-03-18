@@ -1,10 +1,8 @@
 """
-We use APIView in all endpoints instead of the magical
-generic views in favor of code readability/visualization
-of what's happening in each endpoint. It will also
-help people with less/zero knowledge of the framework
-contribute easily without knowing what those generic
-views are for.
+We use APIView in all endpoints instead of the magical generic views in
+favor of code readability/visualization of what's happening in each
+endpoint. It will also help people with less/zero knowledge of the framework
+contribute easily without knowing what those generic views are for.
 """
 from rest_framework.response import Response
 from rest_framework.views import APIView

@@ -3,8 +3,6 @@ WCA database export mapped in Django ORM.
 """
 from django.db import models
 
-from web.models import WCAProfile
-
 
 class Competition(models.Model):
     name = models.CharField(max_length=50, db_column='name')
