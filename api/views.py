@@ -17,10 +17,16 @@ from rest_framework.views import APIView
 from pca.models import WCAProfile, PCAProfile, User
 from wca.client import WCAClient
 
-wca_client = WCAClient()
+
+class WCAMixin:
+    """
+    WCA Mixin object delivers the wca_client to every views
+    """
+    def __init__(self):
+        self.wca_client = WCAClient()
 
 
-class WCAAuthenticate(APIView):
+class WCAAuthenticate(APIView, WCAMixin):
     """
     Authenticates the `code` returned by the WCA login page.
 
@@ -34,7 +40,7 @@ class WCAAuthenticate(APIView):
 
         # Get access token
         host = self.request.get_host()
-        access_token_uri = wca_client.access_token_uri(host, code)
+        access_token_uri = self.wca_client.access_token_uri(host, code)
         response = requests.post(access_token_uri)
         access_token = response.json().get('access_token')
 
@@ -79,7 +85,7 @@ class WCAAuthenticate(APIView):
         })
 
 
-class ListRegions(APIView):
+class ListRegions(APIView, WCAMixin):
     """
     View to list all supported (with rankings) regions in the Philippines.
     """
@@ -101,7 +107,7 @@ class ListRegions(APIView):
         return Response(data)
 
 
-class ListCitiesProvinces(APIView):
+class ListCitiesProvinces(APIView, WCAMixin):
     """
     View to list all supported (with rankings) cities in Metro Manila
     and provinces (excluding Metro Manila) all over the Philippines.
@@ -138,19 +144,19 @@ class ListCitiesProvinces(APIView):
         return Response(data)
 
 
-class ListCompetitions(APIView):
+class ListCompetitions(APIView, WCAMixin):
     """
     View to list all upcoming competitions in the Philippines.
     """
 
     def get(self, request, *args, **kwargs):
         data = {
-            'results': wca_client.competitions(),
+            'results': self.wca_client.competitions(),
         }
         return Response(data)
 
 
-class ListNationalRankings(APIView):
+class ListNationalRankings(APIView, WCAMixin):
     """
     View to list the top 10 rankings of event(s) in national level.
 
@@ -171,14 +177,14 @@ class ListNationalRankings(APIView):
 
             for event in events:
                 if rank_type == 'single' or rank_type == 'all':
-                    best_rankings = wca_client.rankings(event, 'best', 'national')
+                    best_rankings = self.wca_client.rankings(event, 'best', 'national')
                     rankings['single_{}'.format(event)] = best_rankings
 
                 if rank_type == 'average' or rank_type == 'all':
-                    average_rankings = wca_client.rankings(event, 'average', 'nationa')
+                    average_rankings = self.wca_client.rankings(event, 'average', 'nationa')
                     rankings['average_{}'.format(event)] = average_rankings
         else:
-            rankings = wca_client.all_rankings('national')
+            rankings = self.wca_client.all_rankings('national')
 
         data = {
             'results': rankings,
@@ -186,7 +192,7 @@ class ListNationalRankings(APIView):
         return Response(data)
 
 
-class ListRegionalRankings(APIView):
+class ListRegionalRankings(APIView, WCAMixin):
     """
     View to list the top 10 rankings of event(s) in regional level.
 
@@ -206,7 +212,7 @@ class ListRegionalRankings(APIView):
         except Exception:
             raise Http404
 
-        rankings = wca_client.all_rankings('regional', query=region)
+        rankings = self.wca_client.all_rankings('regional', query=region)
 
         data = {
             'results': rankings,
@@ -214,7 +220,7 @@ class ListRegionalRankings(APIView):
         return Response(data)
 
 
-class ListCityProvincialRankings(APIView):
+class ListCityProvincialRankings(APIView, WCAMixin):
     """
     View to list the top 10 rankings of event(s) in city/provincial level.
     Cities are within Metro Manila and provinces excludes Metro Manila.
@@ -232,7 +238,7 @@ class ListCityProvincialRankings(APIView):
 
         # TODO: Validate city/province id
 
-        rankings = wca_client.all_rankings('cityprovincial', query=cityprovince)
+        rankings = self.wca_client.all_rankings('cityprovincial', query=cityprovince)
 
         data = {
             'results': rankings,
