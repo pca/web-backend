@@ -3,6 +3,9 @@ from django.urls import path
 from api import views
 
 urlpatterns = [
+    # Auth
+    path('wca/authenticate/', views.WCAAuthenticate.as_view()),
+
     # Locations
     path('regions/', views.ListRegions.as_view()),
     path('citiesprovinces/', views.ListCitiesProvinces.as_view()),

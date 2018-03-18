@@ -5,13 +5,78 @@ endpoint. It will also help people with less/zero knowledge of the framework
 contribute easily without knowing what those generic views are for.
 """
 import phgeograpy
+import requests
+from django.conf import settings
+from django.contrib.auth import login
 from django.http import Http404
+from django.utils.crypto import get_random_string
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from web.models import WCAProfile, PCAProfile, User
 from wca.client import WCAClient
 
 wca_client = WCAClient()
+
+
+class WCAAuthenticate(APIView):
+    """
+    Authenticates the `code` returned by the WCA login page.
+
+    Args:
+        code: The `code` retured by the WCA login page.
+    """
+
+    def post(self, request, *args, **kwargs):
+        data = request.POST
+        code = data.get('code')
+
+        # Get access token
+        host = self.request.get_host()
+        access_token_uri = wca_client.access_token_uri(host, code)
+        response = requests.post(access_token_uri)
+        access_token = response.json().get('access_token')
+
+        # Get WCA Profile
+        response = requests.get(settings.WCA_API_URI + 'me', headers={
+            'Authorization': 'Bearer {}'.format(access_token),
+        })
+        profile = response.json()
+        profile_data = profile.get('me')
+
+        if not profile_data:
+            return Response({
+                'message': 'Unauthorized.',
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        wca_profile = WCAProfile.objects.filter(wca_pk=profile_data['id']).first()
+
+        if not wca_profile:
+            user = User.objects.create_user(
+                username=str(profile_data['id']),  # Default username is wca_pk
+                password=get_random_string(64),  # Generate random password
+            )
+            wca_profile = WCAProfile.objects.create(
+                user=user,
+                wca_pk=profile_data['id'],
+                wca_id=profile_data['wca_id'],
+                name=profile_data['name'],
+                gender=profile_data['gender'],
+                country_iso2=profile_data['country_iso2'],
+                delegate_status=profile_data['delegate_status'],
+                avatar_url=profile_data['avatar']['url'],
+                avatar_thumb_url=profile_data['avatar']['thumb_url'],
+                is_default_avatar=profile_data['avatar']['is_default'],
+                wca_created_at=profile_data['created_at'],
+                wca_updated_at=profile_data['updated_at'],
+            )
+            PCAProfile.objects.create(user=user)
+
+        login(self.request, wca_profile.user)
+        return Response({
+            'message': 'Authenticated.',
+        })
 
 
 class ListRegions(APIView):
