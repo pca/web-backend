@@ -1,19 +1,15 @@
 from django.contrib import admin
 
-from wca.models import (
-    Competition, Continent, Country, Event,
-    Format, Person, RanksAverage, RanksSingle,
-    Result, RoundTypes, Scramble,
-)
+from wca import models
 
-admin.site.register(Competition)
-admin.site.register(Continent)
-admin.site.register(Country)
-admin.site.register(Event)
-admin.site.register(Format)
-admin.site.register(Person)
-admin.site.register(RanksAverage)
-admin.site.register(RanksSingle)
-admin.site.register(Result)
-admin.site.register(RoundTypes)
-admin.site.register(Scramble)
+admin.site.register(models.Competition)
+admin.site.register(models.Continent)
+admin.site.register(models.Country)
+admin.site.register(models.Event)
+admin.site.register(models.Format)
+admin.site.register(models.Person)
+admin.site.register(models.RanksAverage)
+admin.site.register(models.RanksSingle)
+admin.site.register(models.Result)
+admin.site.register(models.RoundTypes)
+admin.site.register(models.Scramble)

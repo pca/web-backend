@@ -1,5 +1,6 @@
 *.py[cod]
 .env
+.flake8
 production.env
 production.yml
 staging.env

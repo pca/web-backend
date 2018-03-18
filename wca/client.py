@@ -1,0 +1,294 @@
+import json
+import requests
+import shutil
+import subprocess
+import zipfile
+
+import django_rq as q
+import redis
+from django.conf import settings
+from django.db.models import Q
+
+from wca.models import Result
+from pca.models import WCAProfile, DatabaseConfig
+
+r = redis.StrictRedis.from_url(settings.REDIS_URL)
+
+
+class WCAClient:
+    """
+    A class wrapper for WCA-related operations.
+
+    Event glossary:
+        bf - Blindfolded
+        fm - Fewest Moves
+        ft - With Feet
+        mbf - Multi-Blind
+        mbo - Multi-Blind old style
+        oh - One-Handed
+        minx - Megaminx
+        magic - Rubik's Magic
+        mmagic - Master Magic
+    """
+    events = [
+        '222', '333', '333bf', '333fm', '333ft', '333mbf', '333mbo',
+        '333oh', '444', '444bf', '555', '555bf', '666', '777', 'clock',
+        'magic', 'minx', 'mmagic', 'pyram', 'skewb', 'sq1',
+    ]
+
+    def authorize_uri(self, host):
+        """
+        Returns the WCA authorize URI.
+
+        Args:
+            host: The current domain PCA is hosted. Format: domainname.ext
+        """
+        redirect_uri = 'http://{}{}'.format(host, settings.WCA_CALLBACK_PATH)
+        authorize_uri = (
+            '{}authorize/'.format(settings.WCA_OAUTH_URI) +
+            '?client_id={}'.format(settings.WCA_CLIENT_ID) +
+            '&redirect_uri={}'.format(redirect_uri) +
+            '&response_type=code&scope='
+        )
+        return authorize_uri
+
+    def access_token_uri(self, host, code):
+        """
+        Returns the WCA access token URI.
+
+        Args:
+            host: The current domain PCA is hosted. Format: domainname.ext
+        """
+        redirect_uri = 'http://{}{}'.format(host, settings.WCA_CALLBACK_PATH)
+        access_token_uri = (
+            '{}token/'.format(settings.WCA_OAUTH_URI) +
+            '?client_id={}'.format(settings.WCA_CLIENT_ID) +
+            '&client_secret={}'.format(settings.WCA_CLIENT_SECRET) +
+            '&redirect_uri={}'.format(redirect_uri) +
+            '&code={}'.format(code) +
+            '&grant_type=authorization_code'
+        )
+        return access_token_uri
+
+    def competitions(self):
+        """
+        Returns the list of all competitions in the Philippines.
+        """
+        # Try to fetch data from cache
+        competitions = r.get('competitions')
+
+        if competitions:
+            return json.loads(competitions)
+
+        # Fetch competitions from the WCA API
+        response = requests.get('https://www.worldcubeassociation.org/api/v0/search/competitions?q=philippines')
+        competitions = response.json()['result']
+
+        # Cache the result for 10 minutes (600 seconds)
+        r.set('competitions', json.dumps(competitions), 600)
+
+        return competitions
+
+    def all_rankings(self, level, query=None, limit=10):
+        """
+        Returns ranking list of all available events.
+
+        Args:
+            level: Level can be `national`, `regional`, or `cityprovincial`
+            query: Can be a region code or cityprovincial code
+            limit: The number of results
+        """
+        all_rankings = {}
+
+        for event in self.events:
+            best_rankings = self.rankings(event, 'best', level, query=query, limit=limit)
+            average_rankings = self.rankings(event, 'average', level, query=query, limit=limit)
+            all_rankings['single_{}'.format(event)] = best_rankings
+            all_rankings['average_{}'.format(event)] = average_rankings
+
+        return all_rankings
+
+    def rankings(self, event, rank_type, level, query=None, limit=10):
+        """
+        Lists the top `limit` records/rankings of a specific `event`,
+        `rank_type`. and rank `level`.
+
+        Args:
+            event: The type of event to rank
+            rank_type: Rank type can be either be `best` (single) or `average`
+            level: Level can be `national`, `regional`, or `cityprovincial`
+            query: Can be a region code or cityprovincial code
+            limit: The number of results
+        """
+        # Try to fetch result from cache
+        key = '{}{}{}{}{}'.format(event, rank_type, level, query, limit)
+        top_results_in_string = r.get(key)
+
+        if top_results_in_string:
+            return json.loads(top_results_in_string)
+
+        results = self._query_records(event, rank_type, level, query=query)
+        top_results = self._sanitize_results(results, rank_type, limit=limit)
+
+        # Cache result
+        top_results_in_string = json.dumps(top_results)
+        r.set(key, top_results_in_string)
+
+        return top_results
+
+    def recompute_rankings(self, level, query=None, limit=10):
+        """
+        Enqueues a recomputation job as the queries from the live and
+        active databases are long and resource-intensive.
+        """
+        q.enqueue(self._recompute_rankings_job, level, query=query, limit=limit)
+
+    def _get_db_config(self):
+        """
+        Returns the latest WCA database configuration.
+        """
+        db_config = r.get('db_config')
+
+        if not db_config:
+            db_config = DatabaseConfig.db().to_dict()
+            r.set('db_config', json.dumps(db_config))
+            return db_config
+
+        return json.loads(db_config)
+
+    def _query_records(self, event, rank_type, level, query=None):
+        """
+        Fetch the records/rankings of a specific `event`, `rank_type`,
+        and rank `level` from the live and active WCA and PCA database.
+
+        Args:
+            event: The type of event to rank
+            rank_type: Rank type can be either be `best` (single) or `average`
+            level: Level can be `national`, `regional`, or `cityprovincial`
+            query: Can be a region code or cityprovincial code
+        """
+        # Default query for national rankings
+        db_query = Q(person_country_id='Philippines', event_id=event)
+
+        if level != 'national':
+            # Additional query for non-national rankings
+            profile_query_options = {
+                'regional': Q(user__pcaprofile__region=query),
+                'cityprovincial': Q(user__pcaprofile__city_province=query),
+            }
+            profiles = WCAProfile.objects.filter(profile_query_options[level])
+            # Prepare WCA IDs of registered profiles
+            wca_ids = [p.wca_id for p in profiles if p.wca_id]
+            db_query &= Q(person_id__in=wca_ids)
+
+        # Additional query for the rank/result type
+        rank_type_query_options = {
+            'best': Q(best__gt=0),
+            'average': Q(average__gt=0),
+        }
+        db_query &= rank_type_query_options[rank_type]
+
+        # Fetch from the active wca database
+        active_db = self._get_db_config()['active']
+        return Result.objects.using(active_db).filter(db_query).order_by(rank_type)
+
+    def _sanitize_results(self, records, rank_type, limit=10):
+        """
+        Limit results by top `limit` and without repeating
+        person (Only the best record for 1 person).
+
+        Args:
+            records: The QuerySet queried from the database
+            rank_type: Rank type can be either be `best` (single) or `average`
+            limit: The number of results
+        """
+        top_results = []
+        persons_ids = []
+        rank_order = 1
+
+        for result in records:
+            if len(top_results) == limit:
+                break
+
+            if result.person_id not in persons_ids:
+                persons_ids.append(result.person_id)
+                data = result.to_dict(rank_type)
+                data['rank'] = rank_order
+                rank_order += 1
+                top_results.append(data)
+
+        return top_results
+
+    def _recompute_rankings_job(self, level, query=None, limit=10):
+        """
+        Recomputes all the rankings by querying the live and active
+        databases and storing it in the cache.
+
+        Args:
+            level: Level can be `national`, `regional`, or `cityprovincial`
+            query: Can be a region code or cityprovincial code
+            limit: The number of results
+        """
+        for event in self.events:
+            # Singles
+            single_records = self._query_records(event, 'best', level, query=query)
+            single_records = self._sanitize_results(single_records, 'best', limit=limit)
+            key = '{}{}{}{}{}'.format(event, 'best', level, query, limit)
+            r.set(key, json.dumps(single_records))
+
+            # Average
+            average_records = self._query_records(event, 'average', level, query=query)
+            average_records = self._sanitize_results(average_records, 'average', limit=limit)
+            key = '{}{}{}{}{}'.format(event, 'average', level, query, limit)
+            r.set(key, json.dumps(average_records))
+
+    def _sync_wca_database(self):
+        """
+        Downloads the latest WCA database dump, imports it in the
+        inactive wca database, switches the wca databases after the import.
+        Switching means replacing the active database with the inactive one
+        and vice versa.
+        """
+        # TODO: Schedule this method every 1am
+        data_location = 'data/'
+        zip_location = data_location + 'WCA_export.sql.zip'
+        sql_location = data_location + 'WCA_export.sql'
+
+        # Download the latest database dump
+        r = requests.get(settings.WCA_EXPORT_URL, stream=True)
+        with open(zip_location, 'wb') as f:
+            shutil.copyfileobj(r.raw, f)
+
+        # Extract zip file
+        zip_ref = zipfile.ZipFile(zip_location, 'r')
+        zip_ref.extractall(data_location)
+        zip_ref.close()
+
+        # Import the database dump to the inactive table
+        db_config = self.get_db_config()
+        db_django_config = settings.DATABASES[db_config['inactive']]
+        proc = subprocess.Popen(
+            [
+                'mysql',
+                '-u', db_django_config['USER'],
+                '--password={}'.format(db_django_config['PASSWORD']),
+                '-h', db_django_config['HOST'],
+                db_config['inactive'],
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            encoding='utf8',
+        )
+        f = open(sql_location, 'r')
+        out, err = proc.communicate(f.read())
+
+        # TODO: Create missing primary key (id) on Results table
+
+        # Update database config
+        db = DatabaseConfig.db()
+        db.active_database = db_config['inactive']
+        db.inactive_database = db_config['active']
+        db.save()
+
+        # Delete cached database config
+        r.delete('db_config')

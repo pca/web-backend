@@ -32,16 +32,24 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 # Application definition
 
 INSTALLED_APPS = [
+    # Built-in Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # 3rd Party Django apps
     'raven.contrib.django.raven_compat',
+    'rest_framework',
     'django_rq',
-    'web',
+
+    # Project-defined apps
+    'web',  # XXX: Deprecated
     'wca',
+    'pca',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -129,7 +137,7 @@ STATICFILES_DIRS = [
 
 # Override default user model
 
-AUTH_USER_MODEL = 'web.User'
+AUTH_USER_MODEL = 'pca.User'
 
 
 # WCA
