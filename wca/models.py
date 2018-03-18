@@ -149,18 +149,15 @@ class Result(models.Model):
             return 'DNS'
         elif time > 0:
             ms = time % 100
-            time -= ms
-            seconds = int((time % 6000) / 100)
-            minutes = int((time - (seconds * 100)) / 6000)
+            seconds = int(((time - ms) % 6000) / 100)
+            minutes = int((time - (seconds * 100) - ms) / 6000)
 
-            # Add 0 prefix if ms is 1 digit
-            if len(str(ms)) == 1:
-                ms = '0{}'.format(ms)
+            # Add 0 padding on the left if ms is 1 digit
+            ms = '{:0>2}'.format(ms)
 
             if minutes:
-                # Add 0 prefix if seconds is 1 digit
-                if len(str(seconds)) == 1:
-                    seconds = '0{}'.format(seconds)
+                # Add 0 padding on the left  if seconds is 1 digit
+                seconds = '{:0>2}'.format(seconds)
 
                 return '{}:{}.{}'.format(minutes, seconds, ms)
             return '{}.{}'.format(seconds, ms)
