@@ -4,12 +4,72 @@ favor of code readability/visualization of what's happening in each
 endpoint. It will also help people with less/zero knowledge of the framework
 contribute easily without knowing what those generic views are for.
 """
+import phgeograpy
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from wca.client import WCAClient
 
 wca_client = WCAClient()
+
+
+class ListRegions(APIView):
+    """
+    View to list all supported (with rankings) regions in the Philippines.
+    """
+
+    def get(self, request, *args, **kwargs):
+        regions = phgeograpy.regions()
+        results = []
+
+        for region in regions:
+            results.append({
+                'id': region.slug,
+                'name': region.name,
+                'description': region.description,
+            })
+
+        data = {
+            'results': results,
+        }
+        return Response(data)
+
+
+class ListCitiesProvinces(APIView):
+    """
+    View to list all supported (with rankings) cities in Metro Manila
+    and provinces (excluding Metro Manila) all over the Philippines.
+    """
+
+    def get(self, request, *args, **kwargs):
+        results = []
+
+        # Get cities in Metro Manila
+        region = phgeograpy.regions('ncr')
+        province = region.provinces()[0]
+        cities = province.municipalities()
+
+        for city in cities:
+            results.append({
+                'id': city.slug,
+                'name': city.name,
+            })
+
+        # Get provinces
+        provinces = phgeograpy.provinces()
+
+        for province in provinces:
+            # Exclude Metro Manila
+            if province.slug != 'metro_manila':
+                results.append({
+                    'id': province.slug,
+                    'name': province.name,
+                })
+
+        data = {
+            'results': results,
+        }
+        return Response(data)
 
 
 class ListCompetitions(APIView):
