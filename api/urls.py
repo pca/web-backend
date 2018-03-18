@@ -1,5 +1,10 @@
-from django.url import path
+from django.urls import path
 
-app_name = 'api'
+from api import views
+
 urlpatterns = [
+    path('competitions/', views.ListCompetitions.as_view()),
+    path('rankings/national', views.ListNationalRankings.as_view()),
+    path('rankings/regional', views.ListRegionalRankings.as_view()),
+    path('rankings/cityprovincial', views.ListCityProvincialRankings.as_view()),
 ]
