@@ -1,5 +1,5 @@
 """
-This app is now deprecated in favor of the new api + angular setup.
+XXX: This app is now deprecated in favor of the new api + angular setup.
 """
 import requests
 from datetime import datetime
@@ -14,12 +14,13 @@ from django.utils.crypto import get_random_string
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
-from wca.utils import get_all_rankings, enqueue_ranking_computation
-from wca.utils import wca_authorize_uri, wca_access_token_uri, get_competitions
+from wca.client import WCAClient
 from web.constants import LOCATION_DIRECTORY, REGION_CHOICES, CITIES_PROVINCES
 from web.constants import NCR, CITY_OF_MANILA
 from web.forms import PCAProfileForm
 from web.models import User, PCAProfile, WCAProfile
+
+wca_client = WCAClient()
 
 
 class AuthenticateMixin:
@@ -43,7 +44,7 @@ class ContentMixin:
     def get_context_data(self, **kwargs):
         context = super(ContentMixin, self).get_context_data(**kwargs)
         host = self.request.get_host()
-        context['wca_login_uri'] = wca_authorize_uri(host)
+        context['wca_login_uri'] = wca_client.authorize_uri(host)
         context['page'] = self.page
         return context
 
@@ -70,19 +71,25 @@ class ProfileView(AuthenticateMixin, ContentMixin, TemplateView):
         form = PCAProfileForm(request.POST, instance=request.user.pcaprofile)
         if form.is_valid():
             form.save()
-            # Check for updated region/city/province data
+
+            # Check for updated region data
             previous_region = request.session.get('profile_region')
-            updated_region = form.cleaned_data.get('region')
-            if previous_region != updated_region:
+            new_region = form.cleaned_data.get('region')
+
+            if previous_region != new_region:
                 # Recompute regional rankings
-                enqueue_ranking_computation(area='regional', area_filter=previous_region)
-                enqueue_ranking_computation(area='regional', area_filter=updated_region)
+                wca_client.recompute_rankings('regional', query=previous_region)
+                wca_client.recompute_rankings('regional', query=new_region)
+
+            # Check for updated city/province data
             previous_city_province = request.session.get('profile_city_province')
-            updated_city_province = form.cleaned_data.get('city_province')
-            if previous_city_province != updated_city_province:
+            new_city_province = form.cleaned_data.get('city_province')
+
+            if previous_city_province != new_city_province:
                 # Recompute city/provincial rankings
-                enqueue_ranking_computation(area='cityprovincial', area_filter=previous_city_province)
-                enqueue_ranking_computation(area='cityprovincial', area_filter=updated_city_province)
+                wca_client.recompute_rankings('cityprovincial', previous_city_province)
+                wca_client.recompute_rankings('cityprovincial', new_city_province)
+
         return redirect('web:profile')
 
     def get_context_data(self, **kwargs):
@@ -98,13 +105,16 @@ class CompetitionsView(ContentMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(CompetitionsView, self).get_context_data(**kwargs)
-        competitions = get_competitions()
+        competitions = wca_client.competitions()
         upcoming_competitions = []
+
         # Filter upcoming competitions
         for competition in competitions:
             start_date = datetime.strptime(competition['start_date'], "%Y-%m-%d")
+
             if start_date > datetime.today():
                 upcoming_competitions.insert(0, competition)
+
         context['upcoming_competitions'] = upcoming_competitions
         return context
 
@@ -115,7 +125,7 @@ class NationalRankingsView(ContentMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(NationalRankingsView, self).get_context_data(**kwargs)
-        context['all_rankings'] = get_all_rankings(area='national')
+        context['all_rankings'] = wca_client.all_rankings('national')
         return context
 
 
@@ -126,16 +136,18 @@ class RegionalRankingsView(ContentMixin, TemplateView):
     def get_context_data(self, **kwargs):
         region_key = self.request.GET.get('region', NCR)
         region = LOCATION_DIRECTORY.get(region_key)
+
         # Validate region
         if not region:
             raise Http404
+
         context = super(RegionalRankingsView, self).get_context_data(**kwargs)
         context['region'] = {
             'key': region_key,
             'label': region['label'],
         }
         context['region_choices'] = REGION_CHOICES
-        context['all_rankings'] = get_all_rankings(area='regional', area_filter=region)
+        context['all_rankings'] = wca_client.all_rankings('regional', query=region)
         return context
 
 
@@ -145,12 +157,14 @@ class CityProvincialRankingsView(ContentMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         cityprovince = self.request.GET.get('cityprovince', CITY_OF_MANILA)
+
         if cityprovince not in CITIES_PROVINCES:
             raise Http404
+
         context = super(CityProvincialRankingsView, self).get_context_data(**kwargs)
         context['cityprovince'] = cityprovince
         context['cityprovince_choices'] = CITIES_PROVINCES
-        context['all_rankings'] = get_all_rankings(area='cityprovincial', area_filter=cityprovince)
+        context['all_rankings'] = wca_client.all_rankings('cityprovincial', query=cityprovince)
         return context
 
 
@@ -164,11 +178,10 @@ class WCACallbackView(RedirectView):
         data = self.request.GET
         code = data.get('code')
         redirect_uri = 'web:index'
-        print('WCA Callback: {}'.format(data))
 
         # Get access token
         host = self.request.get_host()
-        access_token_uri = wca_access_token_uri(host, code)
+        access_token_uri = wca_client.access_token_uri(host, code)
         response = requests.post(access_token_uri)
         access_token = response.json().get('access_token')
 
@@ -178,18 +191,20 @@ class WCACallbackView(RedirectView):
         })
         profile = response.json()
         profile_data = profile.get('me')
+
         if not profile_data:
             raise Http404
-        print('WCA Profile: {}'.format(profile))
 
         # Check if WCAProfile is already saved, create if not.
         wca_profile = WCAProfile.objects.filter(wca_pk=profile_data['id']).first()
+
         if not wca_profile:
             # Create user
             user = User.objects.create_user(
                 username=str(profile_data['id']),  # Default username is wca_pk
                 password=get_random_string(64),  # Generate random password
             )
+
             # Create WCA profile
             wca_profile = WCAProfile.objects.create(
                 user=user,
@@ -205,10 +220,12 @@ class WCACallbackView(RedirectView):
                 wca_created_at=profile_data['created_at'],
                 wca_updated_at=profile_data['updated_at'],
             )
+
             # Create PCA profile
             PCAProfile.objects.create(
                 user=user,
             )
+
             # Redirect new users to their profile page
             redirect_uri = 'web:profile'
 
