@@ -54,7 +54,7 @@ class ListNationalRankings(APIView):
                     average_rankings = wca_client.rankings(event, 'average', 'nationa')
                     rankings['average_{}'.format(event)] = average_rankings
         else:
-            rankings = wca_client.all_rankings()
+            rankings = wca_client.all_rankings('national')
 
         data = {
             'results': rankings,
