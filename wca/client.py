@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db.models import Q
 
 from wca.models import Result
-from web.models import WCAProfile, DatabaseConfig
+from web.models import  WCAProfile, DatabaseConfig
 
 r = redis.StrictRedis.from_url(settings.REDIS_URL)
 
@@ -36,7 +36,7 @@ class WCAClient:
         'magic', 'minx', 'mmagic', 'pyram', 'skewb', 'sq1',
     ]
 
-    def wca_authorize_uri(self, host):
+    def authorize_uri(self, host):
         """
         Returns the WCA authorize URI.
 
@@ -48,11 +48,11 @@ class WCAClient:
             '{}authorize/'.format(settings.WCA_OAUTH_URI) +
             '?client_id={}'.format(settings.WCA_CLIENT_ID) +
             '&redirect_uri={}'.format(redirect_uri) +
-            '&response_type=code=&scope='
+            '&response_type=code&scope='
         )
         return authorize_uri
 
-    def wca_access_token_uri(self, host, code):
+    def access_token_uri(self, host, code):
         """
         Returns the WCA access token URI.
 
@@ -70,9 +70,9 @@ class WCAClient:
         )
         return access_token_uri
 
-    def competitions():
+    def competitions(self):
         """
-        Returns the list of all upcoming competitions in the Philippines.
+        Returns the list of all competitions in the Philippines.
         """
         # Try to fetch data from cache
         competitions = r.get('competitions')
@@ -101,8 +101,8 @@ class WCAClient:
         all_rankings = {}
 
         for event in self.events:
-            best_rankings = self.get_rankings(event, 'best', level, query=query, limit=limit)
-            average_rankings = self.get_rankings(event, 'average', level, query=query, limit=limit)
+            best_rankings = self.rankings(event, 'best', level, query=query, limit=limit)
+            average_rankings = self.rankings(event, 'average', level, query=query, limit=limit)
             all_rankings['single_{}'.format(event)] = best_rankings
             all_rankings['average_{}'.format(event)] = average_rankings
 
@@ -168,7 +168,7 @@ class WCAClient:
             query: Can be a region code or cityprovincial code
         """
         # Default query for national rankings
-        query = Q(personCountryId='Philippines', eventId=event)
+        db_query = Q(personCountryId='Philippines', eventId=event)
 
         if level != 'national':
             # Additional query for non-national rankings
@@ -179,18 +179,18 @@ class WCAClient:
             profiles = WCAProfile.objects.filter(profile_query_options[level])
             # Prepare WCA IDs of registered profiles
             wca_ids = [p.wca_id for p in profiles if p.wca_id]
-            query &= Q(personId__in=wca_ids)
+            db_query &= Q(personId__in=wca_ids)
 
         # Additional query for the rank/result type
         rank_type_query_options = {
             'best': Q(best__gt=0),
             'average': Q(average__gt=0),
         }
-        query &= rank_type_query_options[rank_type]
+        db_query &= rank_type_query_options[rank_type]
 
         # Fetch from the active wca database
-        active_db = self.get_db_config()['active']
-        return Result.objects.using(active_db).filter(query).order_by(rank_type)
+        active_db = self._get_db_config()['active']
+        return Result.objects.using(active_db).filter(db_query).order_by(rank_type)
 
     def _sanitize_results(self, records, limit=10):
         """

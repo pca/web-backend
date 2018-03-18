@@ -9,7 +9,9 @@ views are for.
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from wca.utils import get_all_rankings, get_rankings, get_competitions
+from wca.client import WCAClient
+
+wca_client = WCAClient()
 
 
 class ListCompetitions(APIView):
@@ -18,9 +20,8 @@ class ListCompetitions(APIView):
     """
 
     def get(self, request, *args, **kwargs):
-        competitions = get_competitions()
         data = {
-            'results': competitions,
+            'results': wca_client.competitions(),
         }
         return Response(data)
 
@@ -33,20 +34,27 @@ class ListNationalRankings(APIView):
         events: A comma-separated list of events. If no `events`
             were requested, all rankings for all events will
             be returned.
+        type: Ranking type can be `all`, `single`, or `average`.
     """
 
     def get(self, request, *args, **kwargs):
         events = request.query_params.get('events')
+        rank_type = request.query_params.get('type')
         rankings = {}
 
         if events:
-            for event in events.split(','):
-                best_rankings = get_rankings(event_type=event, rank_type='best', area='', area_filter='')
-                average_rankings = get_rankings(event_type=event, rank_type='average', area='', area_filter='')
-                rankings['single_{}'.format(event)] = best_rankings
-                rankings['average_{}'.format(event)] = average_rankings
+            events = events.split(',')
+
+            for event in events:
+                if rank_type == 'single' or rank_type == 'all':
+                    best_rankings = wca_client.rankings(event, 'best', 'national')
+                    rankings['single_{}'.format(event)] = best_rankings
+
+                if rank_type == 'average' or rank_type == 'all':
+                    average_rankings = wca_client.rankings(event, 'average', 'nationa')
+                    rankings['average_{}'.format(event)] = average_rankings
         else:
-            rankings = get_all_rankings()
+            rankings = wca_client.all_rankings()
 
         data = {
             'results': rankings,
