@@ -1,3 +1,6 @@
+"""
+This app is now deprecated in favor of the new api + angular setup.
+"""
 import requests
 from datetime import datetime
 

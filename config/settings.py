@@ -47,7 +47,8 @@ INSTALLED_APPS = [
 
     # Project-defined apps
     'web',
-    'wca',
+    'wca',  # XXX: Deprecated
+    'api',
 ]
 
 MIDDLEWARE = [
