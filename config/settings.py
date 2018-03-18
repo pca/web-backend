@@ -32,14 +32,20 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 # Application definition
 
 INSTALLED_APPS = [
+    # Built-in Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # 3rd Party Django apps
     'raven.contrib.django.raven_compat',
+    'rest_framework',
     'django_rq',
+
+    # Project-defined apps
     'web',
     'wca',
 ]
