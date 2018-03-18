@@ -168,7 +168,7 @@ class WCAClient:
             query: Can be a region code or cityprovincial code
         """
         # Default query for national rankings
-        db_query = Q(personCountryId='Philippines', eventId=event)
+        db_query = Q(person_country_id='Philippines', event_id=event)
 
         if level != 'national':
             # Additional query for non-national rankings
@@ -179,7 +179,7 @@ class WCAClient:
             profiles = WCAProfile.objects.filter(profile_query_options[level])
             # Prepare WCA IDs of registered profiles
             wca_ids = [p.wca_id for p in profiles if p.wca_id]
-            db_query &= Q(personId__in=wca_ids)
+            db_query &= Q(person_id__in=wca_ids)
 
         # Additional query for the rank/result type
         rank_type_query_options = {
@@ -208,8 +208,8 @@ class WCAClient:
             if len(top_results) == limit:
                 break
 
-            if result.personId not in persons_ids:
-                persons_ids.append(result.personId)
+            if result.person_id not in persons_ids:
+                persons_ids.append(result.person_id)
                 top_results.append(result.to_dict())
 
         return top_results
