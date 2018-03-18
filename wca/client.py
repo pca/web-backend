@@ -204,6 +204,7 @@ class WCAClient:
         """
         top_results = []
         persons_ids = []
+        rank_order = 1
 
         for result in records:
             if len(top_results) == limit:
@@ -212,6 +213,8 @@ class WCAClient:
             if result.person_id not in persons_ids:
                 persons_ids.append(result.person_id)
                 data = result.to_dict(rank_type)
+                data['rank'] = rank_order
+                rank_order += 1
                 top_results.append(data)
 
         return top_results
