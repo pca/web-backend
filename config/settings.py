@@ -46,8 +46,9 @@ INSTALLED_APPS = [
     'django_rq',
 
     # Project-defined apps
-    'web',
-    'wca',  # XXX: Deprecated
+    'web',  # XXX: Deprecated
+    'wca',
+    'pca',
     'api',
 ]
 
@@ -136,7 +137,7 @@ STATICFILES_DIRS = [
 
 # Override default user model
 
-AUTH_USER_MODEL = 'web.User'
+AUTH_USER_MODEL = 'pca.User'
 
 
 # WCA

@@ -14,7 +14,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from web.models import WCAProfile, PCAProfile, User
+from pca.models import WCAProfile, PCAProfile, User
 from wca.client import WCAClient
 
 wca_client = WCAClient()

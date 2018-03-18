@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db.models import Q
 
 from wca.models import Result
-from web.models import  WCAProfile, DatabaseConfig
+from pca.models import WCAProfile, DatabaseConfig
 
 r = redis.StrictRedis.from_url(settings.REDIS_URL)
 

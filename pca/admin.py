@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from web.models import User, PCAProfile, WCAProfile, DatabaseConfig
+from pca.models import User, PCAProfile, WCAProfile, DatabaseConfig
 
 admin.site.register(User, UserAdmin)
 admin.site.register(PCAProfile)

@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 
-from web.models import PCAProfile
+from pca.models import PCAProfile
 
 
 class PCAProfileForm(ModelForm):

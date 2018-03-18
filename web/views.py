@@ -14,11 +14,11 @@ from django.utils.crypto import get_random_string
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
+from pca.models import User, PCAProfile, WCAProfile
 from wca.client import WCAClient
 from web.constants import LOCATION_DIRECTORY, REGION_CHOICES, CITIES_PROVINCES
 from web.constants import NCR, CITY_OF_MANILA
 from web.forms import PCAProfileForm
-from web.models import User, PCAProfile, WCAProfile
 
 wca_client = WCAClient()
 

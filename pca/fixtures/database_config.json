@@ -1,6 +1,6 @@
 [
     {
-        "model": "web.databaseconfig",
+        "model": "pca.databaseconfig",
         "pk": 1,
         "fields": {
             "active_database": "wca1",
