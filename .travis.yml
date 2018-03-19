@@ -12,7 +12,10 @@ script:
   - docker-compose up -d mysql
   - docker-compose up -d redis
   - docker ps
-  - docker-compose run app python manage.py test
+  - docker-compose run --rm app coverage run manage.py test
+
+after_success:
+  - coveralls
 
 notifications:
   email:
