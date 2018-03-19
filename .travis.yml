@@ -12,15 +12,10 @@ script:
   - docker-compose up -d mysql
   - docker-compose up -d redis
   - docker ps
-  - docker-compose run --rm app coverage run manage.py test
+    #- docker-compose run --rm app coverage run manage.py test
 
 after_success:
   - coveralls
-  - test $TRAVIS_BRANCH = "coveralls/development" --repo=https://GH_TOKEN@github.com/pca/web-backend.git
-
-
-after_failure:
-  - test $TRAVIS_BRANCH = "coveralls/development" --repo=https://GH_TOKEN@github.com/pca/web-backend.git
 
 notifications:
   email:
