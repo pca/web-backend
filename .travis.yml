@@ -16,6 +16,7 @@ script:
   - docker-compose run --rm app coverage report
 
 after_success:
+  - coveralls debug
   - docker-compose run app coveralls debug
 
 notifications:
