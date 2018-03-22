@@ -26,7 +26,7 @@ class WCAMixin:
         self.wca_client = WCAClient()
 
 
-class WCAAuthenticate(APIView, WCAMixin):
+class WCAAuthenticate(WCAMixin, APIView):
     """
     Authenticates the `code` returned by the WCA login page.
 
@@ -85,7 +85,7 @@ class WCAAuthenticate(APIView, WCAMixin):
         })
 
 
-class ListRegions(APIView, WCAMixin):
+class ListRegions(WCAMixin, APIView):
     """
     View to list all supported (with rankings) regions in the Philippines.
     """
@@ -107,7 +107,7 @@ class ListRegions(APIView, WCAMixin):
         return Response(data)
 
 
-class ListCitiesProvinces(APIView, WCAMixin):
+class ListCitiesProvinces(WCAMixin, APIView):
     """
     View to list all supported (with rankings) cities in Metro Manila
     and provinces (excluding Metro Manila) all over the Philippines.
@@ -144,7 +144,7 @@ class ListCitiesProvinces(APIView, WCAMixin):
         return Response(data)
 
 
-class ListCompetitions(APIView, WCAMixin):
+class ListCompetitions(WCAMixin, APIView):
     """
     View to list all upcoming competitions in the Philippines.
     """
@@ -156,7 +156,7 @@ class ListCompetitions(APIView, WCAMixin):
         return Response(data)
 
 
-class ListNationalRankings(APIView, WCAMixin):
+class ListNationalRankings(WCAMixin, APIView):
     """
     View to list the top 10 rankings of event(s) in national level.
 
@@ -192,7 +192,7 @@ class ListNationalRankings(APIView, WCAMixin):
         return Response(data)
 
 
-class ListRegionalRankings(APIView, WCAMixin):
+class ListRegionalRankings(WCAMixin, APIView):
     """
     View to list the top 10 rankings of event(s) in regional level.
 
@@ -220,7 +220,7 @@ class ListRegionalRankings(APIView, WCAMixin):
         return Response(data)
 
 
-class ListCityProvincialRankings(APIView, WCAMixin):
+class ListCityProvincialRankings(WCAMixin, APIView):
     """
     View to list the top 10 rankings of event(s) in city/provincial level.
     Cities are within Metro Manila and provinces excludes Metro Manila.

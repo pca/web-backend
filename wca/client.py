@@ -7,12 +7,11 @@ import zipfile
 import django_rq as q
 import redis
 from django.conf import settings
+from django.db import connections
 from django.db.models import Q
 
 from wca.models import Result
 from pca.models import WCAProfile, DatabaseConfig
-
-r = redis.StrictRedis.from_url(settings.REDIS_URL)
 
 
 class WCAClient:
@@ -35,6 +34,9 @@ class WCAClient:
         '333oh', '444', '444bf', '555', '555bf', '666', '777', 'clock',
         'magic', 'minx', 'mmagic', 'pyram', 'skewb', 'sq1',
     ]
+
+    def __init__(self):
+        self.redis_client = redis.StrictRedis.from_url(settings.REDIS_URL)
 
     def authorize_uri(self, host):
         """
@@ -75,7 +77,7 @@ class WCAClient:
         Returns the list of all competitions in the Philippines.
         """
         # Try to fetch data from cache
-        competitions = r.get('competitions')
+        competitions = self.redis_client.get('competitions')
 
         if competitions:
             return json.loads(competitions)
@@ -85,7 +87,7 @@ class WCAClient:
         competitions = response.json()['result']
 
         # Cache the result for 10 minutes (600 seconds)
-        r.set('competitions', json.dumps(competitions), 600)
+        self.redis_client.set('competitions', json.dumps(competitions), 600)
 
         return competitions
 
@@ -122,7 +124,7 @@ class WCAClient:
         """
         # Try to fetch result from cache
         key = '{}{}{}{}{}'.format(event, rank_type, level, query, limit)
-        top_results_in_string = r.get(key)
+        top_results_in_string = self.redis_client.get(key)
 
         if top_results_in_string:
             return json.loads(top_results_in_string)
@@ -132,7 +134,7 @@ class WCAClient:
 
         # Cache result
         top_results_in_string = json.dumps(top_results)
-        r.set(key, top_results_in_string)
+        self.redis_client.set(key, top_results_in_string)
 
         return top_results
 
@@ -147,11 +149,11 @@ class WCAClient:
         """
         Returns the latest WCA database configuration.
         """
-        db_config = r.get('db_config')
+        db_config = self.redis_client.get('db_config')
 
         if not db_config:
             db_config = DatabaseConfig.db().to_dict()
-            r.set('db_config', json.dumps(db_config))
+            self.redis_client.set('db_config', json.dumps(db_config))
             return db_config
 
         return json.loads(db_config)
@@ -234,15 +236,15 @@ class WCAClient:
             single_records = self._query_records(event, 'best', level, query=query)
             single_records = self._sanitize_results(single_records, 'best', limit=limit)
             key = '{}{}{}{}{}'.format(event, 'best', level, query, limit)
-            r.set(key, json.dumps(single_records))
+            self.redis_client.set(key, json.dumps(single_records))
 
             # Average
             average_records = self._query_records(event, 'average', level, query=query)
             average_records = self._sanitize_results(average_records, 'average', limit=limit)
             key = '{}{}{}{}{}'.format(event, 'average', level, query, limit)
-            r.set(key, json.dumps(average_records))
+            self.redis_client.set(key, json.dumps(average_records))
 
-    def _sync_wca_database(self):
+    def sync_wca_database(self, download_latest=True, test=False):
         """
         Downloads the latest WCA database dump, imports it in the
         inactive wca database, switches the wca databases after the import.
@@ -254,26 +256,27 @@ class WCAClient:
         zip_location = data_location + 'WCA_export.sql.zip'
         sql_location = data_location + 'WCA_export.sql'
 
-        # Download the latest database dump
-        r = requests.get(settings.WCA_EXPORT_URL, stream=True)
-        with open(zip_location, 'wb') as f:
-            shutil.copyfileobj(r.raw, f)
+        if download_latest:
+            response = requests.get(settings.WCA_EXPORT_URL, stream=True)
+            with open(zip_location, 'wb') as f:
+                shutil.copyfileobj(response.raw, f)
 
-        # Extract zip file
-        zip_ref = zipfile.ZipFile(zip_location, 'r')
-        zip_ref.extractall(data_location)
-        zip_ref.close()
+            # Extract zip file
+            with zipfile.ZipFile(zip_location, 'r') as zip_ref:
+                zip_ref.extractall(data_location)
 
         # Import the database dump to the inactive table
-        db_config = self.get_db_config()
-        db_django_config = settings.DATABASES[db_config['inactive']]
+        db_config = DatabaseConfig.db().to_dict()
+        connection = connections[db_config['inactive']]
+        db_django_config = connection.settings_dict
+
         proc = subprocess.Popen(
             [
                 'mysql',
                 '-u', db_django_config['USER'],
                 '--password={}'.format(db_django_config['PASSWORD']),
                 '-h', db_django_config['HOST'],
-                db_config['inactive'],
+                db_django_config['NAME'],
             ],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
@@ -282,7 +285,9 @@ class WCAClient:
         f = open(sql_location, 'r')
         out, err = proc.communicate(f.read())
 
-        # TODO: Create missing primary key (id) on Results table
+        # Create missing primary key (id) on Results table
+        with connection.cursor() as cursor:
+            cursor.execute('ALTER TABLE Results ADD COLUMN `id` int(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT')
 
         # Update database config
         db = DatabaseConfig.db()
@@ -291,4 +296,4 @@ class WCAClient:
         db.save()
 
         # Delete cached database config
-        r.delete('db_config')
+        self.redis_client.delete('db_config')
