@@ -13,10 +13,10 @@ script:
   - docker-compose up -d redis
   - docker ps
   - docker-compose run --rm app coverage run manage.py test
-  - docker-compose run --rm app coverage report
+  - docker-compose run --rm app coverage report -m
 
 after_success:
-  - coveralls
+  - docker-compose run app coveralls
 
 notifications:
   email:
