@@ -17,8 +17,8 @@ script:
   - docker-compose up -d redis
   - docker ps
   - docker-compose run --rm app coverage run manage.py test
-  - docker-compose run --rm app coverage report
-  - ls
+  - docker-compose run --rm app coverage report -m
+  - ls -lht
   - pwd
 
 after_success:
