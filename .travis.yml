@@ -18,6 +18,8 @@ script:
   - docker ps
   - docker-compose run --rm app coverage run manage.py test
   - docker-compose run --rm app coverage report
+  - ls
+  - pwd
 
 after_success:
   - coveralls
