@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'raven.contrib.django.raven_compat',
     'rest_framework',
     'django_rq',
-
+    'django_nose',
+    
     # Project-defined apps
     'web',  # XXX: Deprecated
     'wca',
@@ -168,3 +169,7 @@ RQ_QUEUES = {
 RAVEN_CONFIG = {
     'dsn': os.getenv('SENTRY_DSN'),
 }
+
+# Nose Test Runner
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = ['--with-spec', '--spec-color']

@@ -1,0 +1,13 @@
+[paths]
+source =
+    .
+    /app
+
+[report]
+omit =
+    */migrations/*
+    */tests.py
+    */__init__.py
+    */settings.py
+    */constants.py
+    *manage.py

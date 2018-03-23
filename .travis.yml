@@ -1,18 +1,40 @@
 sudo: required
+language: python
 
 services:
   - docker
+
+before_install:
+  - sudo apt-get install -qq git
+
+install:
+  - pip install python-coveralls
 
 before_script:
   - sudo service mysql stop
   - while sudo lsof -Pi :3306 -sTCP:LISTEN -t; do sleep 1; done
   - docker-compose build
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 
+# script
 script:
   - docker-compose up -d mysql
   - docker-compose up -d redis
-  - docker ps
-  - docker-compose run app python manage.py test
+  - docker ps -a
+  - docker-compose run --rm app coverage run manage.py test
+  - docker ps -a
+  - docker-compose run app ls -lht
+  - docker-compose run --rm app coverage report -m
+  - docker-compose run --rm app coverage xml
+  - docker cp webbackend_app_run_1:/app/.coverage .coverage
+  - docker cp webbackend_app_run_1:/app/coverage.xml coverage.xml
+
+after_success:
+  - sed -i 's#/app/##g' .coverage
+  - coveralls
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
 notifications:
   email:
