@@ -14,7 +14,7 @@ before_script:
   - sudo service mysql stop
   - while sudo lsof -Pi :3306 -sTCP:LISTEN -t; do sleep 1; done
   - docker-compose build
-    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 
