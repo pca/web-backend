@@ -1,0 +1,6 @@
+[paths]
+source =
+    api/
+    config/
+    pca/
+    web/

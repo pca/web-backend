@@ -26,7 +26,8 @@ script:
   - docker cp webbackend_app_run_1:/app/.coverage .coverage
 
 after_success:
-  - docker-compose run --rm app coveralls -v
+  - pwd
+  - ls -la
   - coveralls -v
 
 notifications:
