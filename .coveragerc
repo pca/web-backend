@@ -2,3 +2,8 @@
 source =
     .
     /app
+
+[report]
+omit =
+    */migrations/*
+    */tests.py

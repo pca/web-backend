@@ -23,7 +23,7 @@ script:
   - docker ps -a
   - docker-compose run app ls -lht
   - docker-compose run --rm app coverage report -m
-  - docker cp webbackend_app_run_1:/app/.coverage .coverage.docker
+  - docker cp webbackend_app_run_1:/app/.coverage .coverage
 
 after_success:
   - coverage combine
