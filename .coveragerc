@@ -10,3 +10,4 @@ omit =
     */__init__.py
     */settings.py
     */constants.py
+    *manage.py

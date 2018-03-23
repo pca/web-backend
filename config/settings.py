@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'raven.contrib.django.raven_compat',
     'rest_framework',
     'django_rq',
-    'test_without_migrations',
+    'django_nose',
     
     # Project-defined apps
     'web',  # XXX: Deprecated
@@ -173,6 +173,3 @@ RAVEN_CONFIG = {
 # Nose Test Runner
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = ['--with-spec', '--spec-color']
-
-# Test Without Migrations
-TEST_WITHOUT_MIGRATIONS_COMMAND = 'django_nose.management.commands.test.Command'
