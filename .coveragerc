@@ -7,3 +7,6 @@ source =
 omit =
     */migrations/*
     */tests.py
+    */__init__.py
+    */settings.py
+    */constants.py
