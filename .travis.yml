@@ -31,9 +31,8 @@ script:
 
 after_success:
   - sed -i 's#/app/##g' .coverage
-  - cat .coverage
   - coveralls
-  - ./cc-test-reporter after-build --exit-code $EXIT_CODE
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
 notifications:
   email:
