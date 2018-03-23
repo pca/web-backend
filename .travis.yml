@@ -18,6 +18,7 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 
+# script
 script:
   - docker-compose up -d mysql
   - docker-compose up -d redis
