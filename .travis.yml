@@ -23,10 +23,10 @@ script:
   - docker ps -a
   - docker-compose run app ls -lht
   - docker-compose run --rm app coverage report -m
-  - docker cp webbackend_app_run_1:/app/.coverage .coverage
+  - docker cp webbackend_app_run_1:/app/.coverage .coverage.docker
 
 after_success:
-  - sed -i 's#/app/##g' .coverage
+  - coverage combine
   - coveralls -v
 
 notifications:
