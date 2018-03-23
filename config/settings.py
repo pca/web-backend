@@ -171,4 +171,4 @@ RAVEN_CONFIG = {
 
 # Nose Test Runner
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-NOSE_ARGS = ['--with-spec', '--spec-color', '--with-profile']
+NOSE_ARGS = ['--with-spec', '--spec-color']

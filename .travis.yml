@@ -8,7 +8,7 @@ before_install:
   - sudo apt-get install -qq git
 
 install:
-  - pip install coveralls==1.3.0
+  - pip install python-coveralls
 
 before_script:
   - sudo service mysql stop
