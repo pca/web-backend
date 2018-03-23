@@ -16,11 +16,11 @@ script:
   - docker-compose up -d mysql
   - docker-compose up -d redis
   - docker ps -a
-  - docker-compose run app coverage run manage.py test
+  - docker-compose run --rm app coverage run manage.py test
   - docker ps -a
   - docker-compose run app ls -lht
-    #  - docker-compose run --rm app coverage report -m
-    #  - docker cp webbackend_app_run_1:/app/.coverage .
+  - docker-compose run --rm app coverage report -m
+  - docker cp webbackend_app_run_1:/app/.coverage .coverage
 
 after_success:
   - coveralls
