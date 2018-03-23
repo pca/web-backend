@@ -168,3 +168,7 @@ RQ_QUEUES = {
 RAVEN_CONFIG = {
     'dsn': os.getenv('SENTRY_DSN'),
 }
+
+# Nose Test Runner
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = ['--with-spec', '--spec-color']
