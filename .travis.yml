@@ -18,10 +18,7 @@ script:
   - docker ps
   - docker-compose run --rm app coverage run manage.py test
   - docker-compose run --rm app coverage report -m
-  - docker-compose run --rm app cat .coverage
-  - ls -lht
-  - pwd
-
+  - docker cp webbackend_app_run_1:/app/.coverage .
 
 after_success:
   - coveralls
