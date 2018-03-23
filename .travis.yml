@@ -27,6 +27,7 @@ script:
 
 after_success:
   - sed -i 's#/app/##g' .coverage
+  - cat .coverage
   - coveralls -v
 
 notifications:
