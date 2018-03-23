@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'raven.contrib.django.raven_compat',
     'rest_framework',
     'django_rq',
-
+    'test_without_migrations',
+    
     # Project-defined apps
     'web',  # XXX: Deprecated
     'wca',
