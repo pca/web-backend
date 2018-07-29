@@ -1,8 +1,8 @@
 *.py[cod]
 .env
 .flake8
-production.env
-production.yml
-staging.env
-staging.yml
+envs/production.env
+envs/staging.env
+compose/production.yml
+compose/staging.yml
 venv/
