@@ -259,10 +259,14 @@ class WCAClient:
         with zipfile.ZipFile(zip_location, 'r') as zip_ref:
             zip_ref.extractall('/data/')
 
-    def _import_wca_dump(self):
+    def _import_wca_dump(self, test=False):
         # Import the database dump to the inactive table
         connection = self._get_inactive_connection()
         db_django_config = connection.settings_dict
+        sql_location = '/data/WCA_export.sql'
+
+        if test:
+            sql_location = '/data/WCA_lite.sql'
 
         proc = subprocess.Popen(
             [
@@ -276,7 +280,7 @@ class WCAClient:
             stdout=subprocess.PIPE,
             encoding='utf8',
         )
-        f = open('/data/WCA_export.sql', 'r')
+        f = open(sql_location, 'r')
         out, err = proc.communicate(f.read())
 
     def _switch_wca_database(self):
@@ -296,14 +300,15 @@ class WCAClient:
         # TODO: Schedule this method every 1am
         connection = self._get_inactive_connection()
 
-        if download_latest:
+        if download_latest and not test:
             self._download_wca_dump()
 
-        self._import_wca_dump()
+        self._import_wca_dump(test=test)
 
         # Create missing primary key (id) on Results table
-        with connection.cursor() as cursor:
-            cursor.execute('ALTER TABLE Results ADD COLUMN `id` int(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT')
+        if not test:
+            with connection.cursor() as cursor:
+                cursor.execute('ALTER TABLE Results ADD COLUMN `id` int(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT')
 
         self._switch_wca_database()
 
