@@ -1,2 +1,4 @@
 *
 !.gitignore
+!README.md
+!WCA_lite.sql
