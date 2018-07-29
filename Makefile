@@ -13,22 +13,22 @@ rm:
 	docker-compose -f compose/${COMPOSE_FILE} rm -f
 
 logs:
-	docker-compose -f compose/${COMPOSE_FILE} logs -f --tail 250 app app_worker
+	docker-compose -f compose/${COMPOSE_FILE} logs -f --tail 250 api worker
 
 migrations:
-	docker-compose -f compose/${COMPOSE_FILE} exec app python manage.py makemigrations
+	docker-compose -f compose/${COMPOSE_FILE} exec api python manage.py makemigrations
 
 migrate:
-	docker-compose -f compose/${COMPOSE_FILE} exec app python manage.py migrate
+	docker-compose -f compose/${COMPOSE_FILE} exec api python manage.py migrate
 
 dbconfig:
-	docker-compose -f compose/${COMPOSE_FILE} exec app python manage.py loaddata database_config
+	docker-compose -f compose/${COMPOSE_FILE} exec api python manage.py loaddata database_config
 
 shell:
-	docker-compose -f compose/${COMPOSE_FILE} exec app python manage.py shell
+	docker-compose -f compose/${COMPOSE_FILE} exec api python manage.py shell
 
 superuser:
-	docker-compose -f compose/${COMPOSE_FILE} exec app python manage.py createsuperuser
+	docker-compose -f compose/${COMPOSE_FILE} exec api python manage.py createsuperuser
 
 testsentry:
-	docker-compose -f compose/${COMPOSE_FILE} exec app python manage.py raven test
+	docker-compose -f compose/${COMPOSE_FILE} exec api python manage.py raven test
