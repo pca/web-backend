@@ -23,11 +23,11 @@ script:
   - docker-compose -f compose/development.yml up -d mysql
   - docker-compose -f compose/development.yml up -d redis
   - docker ps -a
-  - docker-compose -f compose/development.yml run --rm app coverage run manage.py test
+  - docker-compose -f compose/development.yml run --rm api coverage run manage.py test
   - docker ps -a
-  - docker-compose -f compose/development.yml run app ls -lht
-  - docker-compose -f compose/development.yml run --rm app coverage report -m
-  - docker-compose -f compose/development.yml run --rm app coverage xml
+  - docker-compose -f compose/development.yml run api ls -lht
+  - docker-compose -f compose/development.yml run --rm api coverage report -m
+  - docker-compose -f compose/development.yml run --rm api coverage xml
   - docker cp webbackend_app_run_1:/app/.coverage .coverage
   - docker cp webbackend_app_run_1:/app/coverage.xml coverage.xml
 
