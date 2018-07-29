@@ -294,7 +294,7 @@ class WCAClient:
         and vice versa.
         """
         # TODO: Schedule this method every 1am
-        connection = self._get_db_connection()
+        connection = self._get_inactive_connection()
 
         if download_latest:
             self._download_wca_dump(download_latest=download_latest)
