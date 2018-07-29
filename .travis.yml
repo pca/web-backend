@@ -32,7 +32,7 @@ script:
   - docker cp compose_api_run_1:/app/coverage.xml coverage.xml
 
 after_success:
-  - sed -i 's#/app/##g' .coverage
+  - sed -i 's#/app#src#g' .coverage
   - coveralls
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
