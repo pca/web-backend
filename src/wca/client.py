@@ -244,30 +244,24 @@ class WCAClient:
             key = '{}{}{}{}{}'.format(event, 'average', level, query, limit)
             self.redis_client.set(key, json.dumps(average_records))
 
-    def sync_wca_database(self, download_latest=True, test=False):
-        """
-        Downloads the latest WCA database dump, imports it in the
-        inactive wca database, switches the wca databases after the import.
-        Switching means replacing the active database with the inactive one
-        and vice versa.
-        """
-        # TODO: Schedule this method every 1am
-        data_location = 'data/'
-        zip_location = data_location + 'WCA_export.sql.zip'
-        sql_location = data_location + 'WCA_export.sql'
+    def _get_inactive_connection(self):
+        db_config = self._get_db_config()
+        return connections[db_config['inactive']]
 
-        if download_latest:
-            response = requests.get(settings.WCA_EXPORT_URL, stream=True)
-            with open(zip_location, 'wb') as f:
-                shutil.copyfileobj(response.raw, f)
+    def _download_wca_dump(self):
+        zip_location = 'data/WCA_export.sql.zip'
 
-            # Extract zip file
-            with zipfile.ZipFile(zip_location, 'r') as zip_ref:
-                zip_ref.extractall(data_location)
+        response = requests.get(settings.WCA_EXPORT_URL, stream=True)
+        with open(zip_location, 'wb') as f:
+            shutil.copyfileobj(response.raw, f)
 
+        # Extract zip file
+        with zipfile.ZipFile(zip_location, 'r') as zip_ref:
+            zip_ref.extractall('data/')
+
+    def _import_wca_dump(self):
         # Import the database dump to the inactive table
-        db_config = DatabaseConfig.db().to_dict()
-        connection = connections[db_config['inactive']]
+        connection = self._get_inactive_connection()
         db_django_config = connection.settings_dict
 
         proc = subprocess.Popen(
@@ -282,18 +276,36 @@ class WCAClient:
             stdout=subprocess.PIPE,
             encoding='utf8',
         )
-        f = open(sql_location, 'r')
+        f = open('data/WCA_export.sql', 'r')
         out, err = proc.communicate(f.read())
+
+    def _switch_wca_database(self):
+        db_config = self._get_db_config()
+        db = DatabaseConfig.db()
+        db.active_database = db_config['inactive']
+        db.inactive_database = db_config['active']
+        db.save()
+
+    def sync_wca_database(self, download_latest=True, test=False):
+        """
+        Downloads the latest WCA database dump, imports it in the
+        inactive wca database, switches the wca databases after the import.
+        Switching means replacing the active database with the inactive one
+        and vice versa.
+        """
+        # TODO: Schedule this method every 1am
+        connection = self._get_db_connection()
+
+        if download_latest:
+            self._download_wca_dump(download_latest=download_latest)
+
+        self._import_wca_dump()
 
         # Create missing primary key (id) on Results table
         with connection.cursor() as cursor:
             cursor.execute('ALTER TABLE Results ADD COLUMN `id` int(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT')
 
-        # Update database config
-        db = DatabaseConfig.db()
-        db.active_database = db_config['inactive']
-        db.inactive_database = db_config['active']
-        db.save()
+        self._switch_wca_database()
 
         # Delete cached database config
         self.redis_client.delete('db_config')

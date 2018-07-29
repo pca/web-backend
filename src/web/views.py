@@ -174,23 +174,47 @@ class WCACallbackView(RedirectView):
     if the user is new. Otherwise, we just do authentication.
     """
 
-    def get_redirect_url(self, *args, **kwargs):
-        data = self.request.GET
-        code = data.get('code')
-        redirect_uri = 'web:index'
-
-        # Get access token
+    def get_wca_profile(self, code):
         host = self.request.get_host()
         access_token_uri = wca_client.access_token_uri(host, code)
         response = requests.post(access_token_uri)
         access_token = response.json().get('access_token')
 
-        # Get WCA Profile
         response = requests.get(settings.WCA_API_URI + 'me', headers={
             'Authorization': 'Bearer {}'.format(access_token),
         })
         profile = response.json()
-        profile_data = profile.get('me')
+        return profile.get('me')
+
+    def create_user(self, profile_data):
+        user = User.objects.create_user(
+            username=str(profile_data['id']),  # Default username is wca_pk
+            password=get_random_string(64),  # Generate random password
+        )
+
+        wca_profile = WCAProfile.objects.create(
+            user=user,
+            wca_pk=profile_data['id'],
+            wca_id=profile_data['wca_id'],
+            name=profile_data['name'],
+            gender=profile_data['gender'],
+            country_iso2=profile_data['country_iso2'],
+            delegate_status=profile_data['delegate_status'],
+            avatar_url=profile_data['avatar']['url'],
+            avatar_thumb_url=profile_data['avatar']['thumb_url'],
+            is_default_avatar=profile_data['avatar']['is_default'],
+            wca_created_at=profile_data['created_at'],
+            wca_updated_at=profile_data['updated_at'],
+        )
+
+        PCAProfile.objects.create(user=user)
+
+    def get_redirect_url(self, *args, **kwargs):
+        data = self.request.GET
+        code = data.get('code')
+        redirect_uri = 'web:index'
+
+        profile_data = self.get_wca_profile(code)
 
         if not profile_data:
             raise Http404
@@ -199,32 +223,7 @@ class WCACallbackView(RedirectView):
         wca_profile = WCAProfile.objects.filter(wca_pk=profile_data['id']).first()
 
         if not wca_profile:
-            # Create user
-            user = User.objects.create_user(
-                username=str(profile_data['id']),  # Default username is wca_pk
-                password=get_random_string(64),  # Generate random password
-            )
-
-            # Create WCA profile
-            wca_profile = WCAProfile.objects.create(
-                user=user,
-                wca_pk=profile_data['id'],
-                wca_id=profile_data['wca_id'],
-                name=profile_data['name'],
-                gender=profile_data['gender'],
-                country_iso2=profile_data['country_iso2'],
-                delegate_status=profile_data['delegate_status'],
-                avatar_url=profile_data['avatar']['url'],
-                avatar_thumb_url=profile_data['avatar']['thumb_url'],
-                is_default_avatar=profile_data['avatar']['is_default'],
-                wca_created_at=profile_data['created_at'],
-                wca_updated_at=profile_data['updated_at'],
-            )
-
-            # Create PCA profile
-            PCAProfile.objects.create(
-                user=user,
-            )
+            self.create_user(profile_data)
 
             # Redirect new users to their profile page
             redirect_uri = 'web:profile'

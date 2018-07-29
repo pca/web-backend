@@ -34,22 +34,48 @@ class WCAAuthenticate(WCAMixin, APIView):
         code: The `code` retured by the WCA login page.
     """
 
-    def post(self, request, *args, **kwargs):
-        data = request.POST
-        code = data.get('code')
-
-        # Get access token
+    def get_wca_profile(self, code):
         host = self.request.get_host()
         access_token_uri = self.wca_client.access_token_uri(host, code)
         response = requests.post(access_token_uri)
         access_token = response.json().get('access_token')
 
-        # Get WCA Profile
         response = requests.get(settings.WCA_API_URI + 'me', headers={
             'Authorization': 'Bearer {}'.format(access_token),
         })
         profile = response.json()
-        profile_data = profile.get('me')
+        return profile.get('me')
+
+    def create_user(self, profile_data):
+        user = User.objects.create_user(
+            username=str(profile_data['id']),  # Default username is wca_pk
+            password=get_random_string(64),  # Generate random password
+        )
+
+        wca_profile = WCAProfile.objects.create(
+            user=user,
+            wca_pk=profile_data['id'],
+            wca_id=profile_data['wca_id'],
+            name=profile_data['name'],
+            gender=profile_data['gender'],
+            country_iso2=profile_data['country_iso2'],
+            delegate_status=profile_data['delegate_status'],
+            avatar_url=profile_data['avatar']['url'],
+            avatar_thumb_url=profile_data['avatar']['thumb_url'],
+            is_default_avatar=profile_data['avatar']['is_default'],
+            wca_created_at=profile_data['created_at'],
+            wca_updated_at=profile_data['updated_at'],
+        )
+
+        PCAProfile.objects.create(user=user)
+
+        return wca_profile
+
+    def post(self, request, *args, **kwargs):
+        data = request.POST
+        code = data.get('code')
+
+        profile_data = self.get_wca_profile(code)
 
         if not profile_data:
             return Response({
@@ -59,25 +85,7 @@ class WCAAuthenticate(WCAMixin, APIView):
         wca_profile = WCAProfile.objects.filter(wca_pk=profile_data['id']).first()
 
         if not wca_profile:
-            user = User.objects.create_user(
-                username=str(profile_data['id']),  # Default username is wca_pk
-                password=get_random_string(64),  # Generate random password
-            )
-            wca_profile = WCAProfile.objects.create(
-                user=user,
-                wca_pk=profile_data['id'],
-                wca_id=profile_data['wca_id'],
-                name=profile_data['name'],
-                gender=profile_data['gender'],
-                country_iso2=profile_data['country_iso2'],
-                delegate_status=profile_data['delegate_status'],
-                avatar_url=profile_data['avatar']['url'],
-                avatar_thumb_url=profile_data['avatar']['thumb_url'],
-                is_default_avatar=profile_data['avatar']['is_default'],
-                wca_created_at=profile_data['created_at'],
-                wca_updated_at=profile_data['updated_at'],
-            )
-            PCAProfile.objects.create(user=user)
+            wca_profile = self.create_user(profile_data)
 
         login(self.request, wca_profile.user)
         return Response({

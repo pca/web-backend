@@ -141,13 +141,14 @@ class Result(models.Model):
 
     @classmethod
     def format_time(cls, time):
+        defaults = {
+            -1: 'DNF',
+            -2: 'DNS',
+        }
+
         time = int(time)  # Ensure data type
 
-        if time == -1:
-            return 'DNF'
-        elif time == -2:
-            return 'DNS'
-        elif time > 0:
+        if time > 0:
             ms = time % 100
             seconds = int(((time - ms) % 6000) / 100)
             minutes = int((time - (seconds * 100) - ms) / 6000)
@@ -162,7 +163,7 @@ class Result(models.Model):
                 return '{}:{}.{}'.format(minutes, seconds, ms)
             return '{}.{}'.format(seconds, ms)
 
-        return time
+        return defaults.get(time, 'ERR')
 
     def to_dict(self, rank_type):
         time = getattr(self, rank_type)
