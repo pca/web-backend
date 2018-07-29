@@ -13,26 +13,26 @@ install:
 before_script:
   - sudo service mysql stop
   - while sudo lsof -Pi :3306 -sTCP:LISTEN -t; do sleep 1; done
-  - docker-compose build
+  - docker-compose -f compose/development.yml build
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 
 # script
 script:
-  - docker-compose up -d mysql
-  - docker-compose up -d redis
+  - docker-compose -f compose/development.yml up -d mysql
+  - docker-compose -f compose/development.yml up -d redis
   - docker ps -a
-  - docker-compose run --rm app coverage run manage.py test
+  - docker-compose -f compose/development.yml run --rm api coverage run manage.py test
   - docker ps -a
-  - docker-compose run app ls -lht
-  - docker-compose run --rm app coverage report -m
-  - docker-compose run --rm app coverage xml
-  - docker cp webbackend_app_run_1:/app/.coverage .coverage
-  - docker cp webbackend_app_run_1:/app/coverage.xml coverage.xml
+  - docker-compose -f compose/development.yml run api ls -lht
+  - docker-compose -f compose/development.yml run --rm api coverage report -m
+  - docker-compose -f compose/development.yml run --rm api coverage xml
+  - docker cp compose_api_run_1:/app/.coverage .coverage
+  - docker cp compose_api_run_1:/app/coverage.xml coverage.xml
 
 after_success:
-  - sed -i 's#/app/##g' .coverage
+  - sed -i 's#/app#src#g' .coverage
   - coveralls
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 

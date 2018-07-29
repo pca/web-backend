@@ -1,9 +1,10 @@
 version: "2"
 services:
-  app:
-    build: .
+  api:
+    build: ..
+    container_name: pca_api
     command: python manage.py runserver 0.0.0.0:8000
-    env_file: development.env
+    env_file: ../envs/development.env
     environment:
       PYTHONUNBUFFERED: 1
     links:
@@ -12,28 +13,36 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - .:/app
-  app_worker:
-    build: .
+      - ../src:/app
+      - ../data:/data
+
+  worker:
+    build: ..
+    container_name: pca_worker
     command: python manage.py rqworker default
-    env_file: development.env
+    env_file: ../envs/development.env
     environment:
       PYTHONUNBUFFERED: 1
     links:
       - mysql
       - redis
     volumes:
-      - .:/app
+      - ../src:/app
+
   mysql:
     image: mysql:5.6
-    env_file: development.env
+    container_name: pca_mysql
+    env_file: ../envs/development.env
     volumes:
       - pca_volume:/var/lib/mysql
+
   redis:
     image: redis:2.8
+    container_name: pca_redis
     command: redis-server --appendonly yes
     volumes:
       - pca_volume:/data
+
 volumes:
   pca_volume:
     driver: local

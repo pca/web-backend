@@ -1,34 +1,34 @@
-COMPOSE_FILE?=docker-compose.yml
+COMPOSE_FILE?=development.yml
 
 build:
-	docker-compose -f ${COMPOSE_FILE} build
+	docker-compose -f compose/${COMPOSE_FILE} build
 
 run:
-	docker-compose -f ${COMPOSE_FILE} up -d
+	docker-compose -f compose/${COMPOSE_FILE} up -d
 
 stop:
-	docker-compose -f ${COMPOSE_FILE} stop
+	docker-compose -f compose/${COMPOSE_FILE} stop
 
 rm:
-	docker-compose -f ${COMPOSE_FILE} rm -f
+	docker-compose -f compose/${COMPOSE_FILE} rm -f
 
 logs:
-	docker-compose -f ${COMPOSE_FILE} logs -f --tail 250 app app_worker
+	docker-compose -f compose/${COMPOSE_FILE} logs -f --tail 250 api worker
 
 migrations:
-	docker-compose -f ${COMPOSE_FILE} exec app python manage.py makemigrations
+	docker-compose -f compose/${COMPOSE_FILE} exec api python manage.py makemigrations
 
 migrate:
-	docker-compose -f ${COMPOSE_FILE} exec app python manage.py migrate
+	docker-compose -f compose/${COMPOSE_FILE} exec api python manage.py migrate
 
 dbconfig:
-	docker-compose -f ${COMPOSE_FILE} exec app python manage.py loaddata database_config
+	docker-compose -f compose/${COMPOSE_FILE} exec api python manage.py loaddata database_config
 
 shell:
-	docker-compose -f ${COMPOSE_FILE} exec app python manage.py shell
+	docker-compose -f compose/${COMPOSE_FILE} exec api python manage.py shell
 
 superuser:
-	docker-compose -f ${COMPOSE_FILE} exec app python manage.py createsuperuser
+	docker-compose -f compose/${COMPOSE_FILE} exec api python manage.py createsuperuser
 
 testsentry:
-	docker-compose -f ${COMPOSE_FILE} exec app python manage.py raven test
+	docker-compose -f compose/${COMPOSE_FILE} exec api python manage.py raven test
