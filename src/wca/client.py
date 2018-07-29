@@ -249,7 +249,7 @@ class WCAClient:
         return connections[db_config['inactive']]
 
     def _download_wca_dump(self):
-        zip_location = 'data/WCA_export.sql.zip'
+        zip_location = '/data/WCA_export.sql.zip'
 
         response = requests.get(settings.WCA_EXPORT_URL, stream=True)
         with open(zip_location, 'wb') as f:
@@ -257,7 +257,7 @@ class WCAClient:
 
         # Extract zip file
         with zipfile.ZipFile(zip_location, 'r') as zip_ref:
-            zip_ref.extractall('data/')
+            zip_ref.extractall('/data/')
 
     def _import_wca_dump(self):
         # Import the database dump to the inactive table
@@ -276,7 +276,7 @@ class WCAClient:
             stdout=subprocess.PIPE,
             encoding='utf8',
         )
-        f = open('data/WCA_export.sql', 'r')
+        f = open('/data/WCA_export.sql', 'r')
         out, err = proc.communicate(f.read())
 
     def _switch_wca_database(self):
@@ -297,7 +297,7 @@ class WCAClient:
         connection = self._get_inactive_connection()
 
         if download_latest:
-            self._download_wca_dump(download_latest=download_latest)
+            self._download_wca_dump()
 
         self._import_wca_dump()
 
