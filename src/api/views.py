@@ -15,18 +15,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from pca.models import WCAProfile, PCAProfile, User
-from wca.client import WCAClient
+from pca.mixins import ClientMixin
 
 
-class WCAMixin:
-    """
-    WCA Mixin object delivers the wca_client to every views
-    """
-    def __init__(self):
-        self.wca_client = WCAClient()
-
-
-class WCAAuthenticate(WCAMixin, APIView):
+class WCAAuthenticate(ClientMixin, APIView):
     """
     Authenticates the `code` returned by the WCA login page.
 
@@ -34,48 +26,12 @@ class WCAAuthenticate(WCAMixin, APIView):
         code: The `code` retured by the WCA login page.
     """
 
-    def get_wca_profile(self, code):
-        host = self.request.get_host()
-        access_token_uri = self.wca_client.access_token_uri(host, code)
-        response = requests.post(access_token_uri)
-        access_token = response.json().get('access_token')
-
-        response = requests.get(settings.WCA_API_URI + 'me', headers={
-            'Authorization': 'Bearer {}'.format(access_token),
-        })
-        profile = response.json()
-        return profile.get('me')
-
-    def create_user(self, profile_data):
-        user = User.objects.create_user(
-            username=str(profile_data['id']),  # Default username is wca_pk
-            password=get_random_string(64),  # Generate random password
-        )
-
-        wca_profile = WCAProfile.objects.create(
-            user=user,
-            wca_pk=profile_data['id'],
-            wca_id=profile_data['wca_id'],
-            name=profile_data['name'],
-            gender=profile_data['gender'],
-            country_iso2=profile_data['country_iso2'],
-            delegate_status=profile_data['delegate_status'],
-            avatar_url=profile_data['avatar']['url'],
-            avatar_thumb_url=profile_data['avatar']['thumb_url'],
-            is_default_avatar=profile_data['avatar']['is_default'],
-            wca_created_at=profile_data['created_at'],
-            wca_updated_at=profile_data['updated_at'],
-        )
-
-        PCAProfile.objects.create(user=user)
-
-        return wca_profile
-
     def post(self, request, *args, **kwargs):
         data = request.POST
         code = data.get('code')
 
-        profile_data = self.get_wca_profile(code)
+        host = self.request.get_host()
+        profile_data = self.pca_client.get_wca_profile(host, code)
 
         if not profile_data:
             return Response({
@@ -85,7 +41,7 @@ class WCAAuthenticate(WCAMixin, APIView):
         wca_profile = WCAProfile.objects.filter(wca_pk=profile_data['id']).first()
 
         if not wca_profile:
-            wca_profile = self.create_user(profile_data)
+            wca_profile = self.pca_client.create_user(profile_data)
 
         login(self.request, wca_profile.user)
         return Response({
@@ -93,7 +49,7 @@ class WCAAuthenticate(WCAMixin, APIView):
         })
 
 
-class ListRegions(WCAMixin, APIView):
+class ListRegions(ClientMixin, APIView):
     """
     View to list all supported (with rankings) regions in the Philippines.
     """
@@ -115,7 +71,7 @@ class ListRegions(WCAMixin, APIView):
         return Response(data)
 
 
-class ListCitiesProvinces(WCAMixin, APIView):
+class ListCitiesProvinces(ClientMixin, APIView):
     """
     View to list all supported (with rankings) cities in Metro Manila
     and provinces (excluding Metro Manila) all over the Philippines.
@@ -152,7 +108,7 @@ class ListCitiesProvinces(WCAMixin, APIView):
         return Response(data)
 
 
-class ListCompetitions(WCAMixin, APIView):
+class ListCompetitions(ClientMixin, APIView):
     """
     View to list all upcoming competitions in the Philippines.
     """
@@ -164,7 +120,7 @@ class ListCompetitions(WCAMixin, APIView):
         return Response(data)
 
 
-class ListNationalRankings(WCAMixin, APIView):
+class ListNationalRankings(ClientMixin, APIView):
     """
     View to list the top 10 rankings of event(s) in national level.
 
@@ -189,7 +145,7 @@ class ListNationalRankings(WCAMixin, APIView):
                     rankings['single_{}'.format(event)] = best_rankings
 
                 if rank_type == 'average' or rank_type == 'all':
-                    average_rankings = self.wca_client.rankings(event, 'average', 'nationa')
+                    average_rankings = self.wca_client.rankings(event, 'average', 'national')
                     rankings['average_{}'.format(event)] = average_rankings
         else:
             rankings = self.wca_client.all_rankings('national')
@@ -200,7 +156,7 @@ class ListNationalRankings(WCAMixin, APIView):
         return Response(data)
 
 
-class ListRegionalRankings(WCAMixin, APIView):
+class ListRegionalRankings(ClientMixin, APIView):
     """
     View to list the top 10 rankings of event(s) in regional level.
 
@@ -228,7 +184,7 @@ class ListRegionalRankings(WCAMixin, APIView):
         return Response(data)
 
 
-class ListCityProvincialRankings(WCAMixin, APIView):
+class ListCityProvincialRankings(ClientMixin, APIView):
     """
     View to list the top 10 rankings of event(s) in city/provincial level.
     Cities are within Metro Manila and provinces excludes Metro Manila.

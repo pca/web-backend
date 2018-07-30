@@ -2,3 +2,4 @@ exclude_patterns:
 - "**/tests.py"
 - "**/tests/"
 - "**/migrations/"
+- "**/models.py"
