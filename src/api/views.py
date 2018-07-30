@@ -145,7 +145,7 @@ class ListNationalRankings(ClientMixin, APIView):
                     rankings['single_{}'.format(event)] = best_rankings
 
                 if rank_type == 'average' or rank_type == 'all':
-                    average_rankings = self.wca_client.rankings(event, 'average', 'nationa')
+                    average_rankings = self.wca_client.rankings(event, 'average', 'national')
                     rankings['average_{}'.format(event)] = average_rankings
         else:
             rankings = self.wca_client.all_rankings('national')
