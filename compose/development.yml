@@ -26,6 +26,8 @@ services:
     links:
       - mysql
       - redis
+    depends_on:
+      - mysql
     volumes:
       - ../src:/app
 
