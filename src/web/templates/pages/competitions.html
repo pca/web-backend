@@ -1,21 +1,39 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="row mt-50">
-    <div class="col">
-      <h1>Upcoming Competitions</h1>
+  <div class="container" style="margin-top: 80px">
+    <div class="row" style="margin-top: 100px">
+      <div class="col">
+        <h1><span class="fa fa-trophy"></span> Upcoming Competitions</h1>
+      </div>
     </div>
-  </div>
-  <div class="row mt-30">
-    <div class="col">
-      <ul class="list-unstyled">
-        {% for competition in upcoming_competitions %}
-          <li>
-            <a href="{{ competition.website }}"><b>{{ competition.name }} - {{ competition.city }}</b></a>
-            <p>{{ competition.start_date }} to {{ competition.end_date }}</p>
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
+
+    <hr class="my-4">
+
+    {% for competition in upcoming_competitions %}
+      <div class="row">
+        <div class="col-5">
+          <h3><a href="{{ competition.website }}">{{ competition.name }}</a></h3>
+          <ul class="list-unstyled">
+            <li>{{ competition.city }}</li>
+            <li>{{ competition.start_date }} to {{ competition.end_date }}</li>
+          </ul>
+        </div>
+        <div class="col-2">
+          <h4>Delegates</h4>
+          <img width="50px" height="50px" class="rounded-circle" src="https://www.worldcubeassociation.org/uploads/user/avatar/2010UBAL01/1506331030_thumb.jpg" alt="Delegate">
+          <img width="50px" height="50px" class="rounded-circle" src="https://www.worldcubeassociation.org/uploads/user/avatar/2014LAGA02/1530177072_thumb.jpg" alt="Delegate">
+        </div>
+        <div class="col-3">
+          <h4>Organizers</h4>
+          <img width="50px" height="50px" class="rounded-circle" src="https://www.worldcubeassociation.org/uploads/user/avatar/2012LALO01/1479956163_thumb.JPG" alt="Organizer">
+          <img width="50px" height="50px" class="rounded-circle" src="https://www.worldcubeassociation.org/uploads/user/avatar/2015YUNE01/1497874522_thumb.jpeg" alt="Organizer">
+          <img width="50px" height="50px" class="rounded-circle" src="https://www.worldcubeassociation.org/uploads/user/avatar/2017ACAN02/1513673671_thumb.jpg" alt="Organizer">
+        </div>
+        <div class="col text-right">
+          <a href="{{ competition.website }}/register" class="btn btn-primary" style="margin-top: 25px; margin-right: 18px">Register</a>
+        </div>
+      </div>
+    {% endfor %}
   </div>
 {% endblock %}
