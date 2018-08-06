@@ -228,25 +228,11 @@ class WCAClient:
         db_config = self._get_db_config()
         return connections[db_config['inactive']]
 
-    def _download_wca_dump(self):
-        zip_location = '/data/WCA_export.sql.zip'
-
-        response = requests.get(settings.WCA_EXPORT_URL, stream=True)
-        with open(zip_location, 'wb') as f:
-            shutil.copyfileobj(response.raw, f)
-
-        # Extract zip file
-        with zipfile.ZipFile(zip_location, 'r') as zip_ref:
-            zip_ref.extractall('/data/')
-
-    def _import_wca_dump(self, test=False):
+    def _import_wca_test_dump(self, test=False):
         # Import the database dump to the inactive table
         connection = self._get_inactive_connection()
         db_django_config = connection.settings_dict
-        sql_location = '/data/WCA_export.sql'
-
-        if test:
-            sql_location = '/data/WCA_lite.sql'
+        sql_location = '/data/WCA_lite.sql'
 
         proc = subprocess.Popen(
             [
@@ -272,25 +258,19 @@ class WCAClient:
 
         return db.active_database
 
-    def sync_wca_database(self, download_latest=True, test=False):
+    def import_wca_test_database(self):
         """
-        Downloads the latest WCA database dump, imports it in the
-        inactive wca database, switches the wca databases after the import.
-        Switching means replacing the active database with the inactive one
-        and vice versa.
+        Imports the WCA_lite test database dump.
+        Note: Should only be used in test cases using test databases.
         """
-        # TODO: Schedule this method every 1am
-        connection = self._get_inactive_connection()
+        # connection = self._get_inactive_connection()
 
-        if download_latest and not test:
-            self._download_wca_dump()
-
-        self._import_wca_dump(test=test)
+        self._import_wca_test_dump()
 
         # Create missing primary key (id) on Results table
-        if not test:
-            with connection.cursor() as cursor:
-                cursor.execute('ALTER TABLE Results ADD COLUMN `id` int(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT')
+        # XXX: Temporarily not needed as the test dump already contains `id` column
+        # with connection.cursor() as cursor:
+        #     cursor.execute('ALTER TABLE Results ADD COLUMN `id` int(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT')
 
         self._switch_wca_database()
 
