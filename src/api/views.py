@@ -5,17 +5,14 @@ endpoint. It will also help people with less/zero knowledge of the framework
 contribute easily without knowing what those generic views are for.
 """
 import phgeograpy
-import requests
-from django.conf import settings
 from django.contrib.auth import login
 from django.http import Http404
-from django.utils.crypto import get_random_string
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from pca.client import pca_client
-from pca.models import WCAProfile, PCAProfile, User
+from pca.models import WCAProfile
 
 from wca.client import wca_client
 

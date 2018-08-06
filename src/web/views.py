@@ -1,21 +1,18 @@
 """
 XXX: This app is now deprecated in favor of the new api + angular setup.
 """
-import requests
 from datetime import datetime
 
-from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.views import LogoutView
 from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.utils.crypto import get_random_string
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
 from pca.client import pca_client
-from pca.models import User, PCAProfile, WCAProfile
+from pca.models import WCAProfile
 
 from wca.client import wca_client
 from web.constants import LOCATION_DIRECTORY, REGION_CHOICES, CITIES_PROVINCES
