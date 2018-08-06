@@ -37,6 +37,7 @@ services:
     env_file: ../envs/development.env
     volumes:
       - pca_volume:/var/lib/mysql
+      - ../data/mysql:/docker-entrypoint-initdb.d
 
   redis:
     image: redis:2.8
