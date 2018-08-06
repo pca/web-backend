@@ -10,4 +10,5 @@ omit =
     */__init__.py
     */settings.py
     */constants.py
+    */models.py
     *manage.py
