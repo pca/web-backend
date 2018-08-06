@@ -72,6 +72,17 @@ class WCAClient:
         )
         return access_token_uri
 
+    def get_profile(self, host, code):
+        access_token_uri = self.access_token_uri(host, code)
+        response = requests.post(access_token_uri)
+        access_token = response.json().get('access_token')
+
+        response = requests.get(settings.WCA_API_URI + 'me', headers={
+            'Authorization': 'Bearer {}'.format(access_token),
+        })
+        profile = response.json()
+        return profile.get('me')
+
     def competitions(self):
         """
         Returns the list of all competitions in the Philippines.
@@ -314,3 +325,6 @@ class WCAClient:
 
         # Delete cached database config
         self.redis_client.delete('db_config')
+
+
+wca_client = WCAClient()

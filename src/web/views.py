@@ -14,15 +14,13 @@ from django.utils.crypto import get_random_string
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
+from pca.client import pca_client
 from pca.models import User, PCAProfile, WCAProfile
-from pca.mixins import ClientMixin
 
-from wca.client import WCAClient
+from wca.client import wca_client
 from web.constants import LOCATION_DIRECTORY, REGION_CHOICES, CITIES_PROVINCES
 from web.constants import NCR, CITY_OF_MANILA
 from web.forms import PCAProfileForm
-
-wca_client = WCAClient()
 
 
 class AuthenticateMixin:
@@ -170,7 +168,7 @@ class CityProvincialRankingsView(ContentMixin, TemplateView):
         return context
 
 
-class WCACallbackView(ClientMixin, RedirectView):
+class WCACallbackView(RedirectView):
     """
     Validates WCA user, creates a PCA user and a WCA profile
     if the user is new. Otherwise, we just do authentication.
@@ -182,7 +180,7 @@ class WCACallbackView(ClientMixin, RedirectView):
         redirect_uri = 'web:index'
 
         host = self.request.get_host()
-        profile_data = self.pca_client.get_wca_profile(host, code)
+        profile_data = wca_client.get_profile(host, code)
 
         if not profile_data:
             raise Http404
@@ -191,7 +189,7 @@ class WCACallbackView(ClientMixin, RedirectView):
         wca_profile = WCAProfile.objects.filter(wca_pk=profile_data['id']).first()
 
         if not wca_profile:
-            self.pca_client.create_user(profile_data)
+            pca_client.create_user(profile_data)
 
             # Redirect new users to their profile page
             redirect_uri = 'web:profile'

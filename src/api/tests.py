@@ -7,7 +7,7 @@ from rest_framework.test import APIRequestFactory
 
 from api import views
 from pca.models import DatabaseConfig
-from wca.client import WCAClient
+from wca.client import wca_client
 
 
 class LocationAPITestCase(TestCase):
@@ -54,7 +54,6 @@ class RankingsAPITestCase(TestCase):
             active_database='wca1',
             inactive_database='wca2',
         )
-        wca_client = WCAClient()
         dump_path = 'data/WCA_export.sql'
         data_dump = Path(dump_path)
         dump_exists = data_dump.is_file()

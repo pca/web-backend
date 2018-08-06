@@ -1,5 +1,3 @@
-import requests
-
 from pca.models import WCAProfile, PCAProfile, User
 
 
@@ -7,20 +5,6 @@ class PCAClient:
     """
     A class wrapper for PCA-related operations.
     """
-
-    def __init__(self, wca_client):
-    	self.wca_client = wca_client
-
-    def get_wca_profile(self, host, code):
-        access_token_uri = self.wca_client.access_token_uri(host, code)
-        response = requests.post(access_token_uri)
-        access_token = response.json().get('access_token')
-
-        response = requests.get(settings.WCA_API_URI + 'me', headers={
-            'Authorization': 'Bearer {}'.format(access_token),
-        })
-        profile = response.json()
-        return profile.get('me')
 
     def create_user(self, profile_data):
         user = User.objects.create_user(
@@ -46,3 +30,6 @@ class PCAClient:
         PCAProfile.objects.create(user=user)
 
         return wca_profile
+
+
+pca_client = PCAClient()
