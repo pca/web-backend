@@ -16,6 +16,7 @@ services:
     volumes:
       - ../src:/app
       - ../data:/data
+      - ../scripts:/scripts
 
   worker:
     build: ..
