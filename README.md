@@ -28,24 +28,13 @@ No official record has been tampered/modified.
 *  [docker](https://www.docker.com/community-edition#/download)
 *  [docker-compose](https://docs.docker.com/compose/install/)
 
-### Config Setup
+### Development Setup
 
-1. Setup configuration depending on the environment you're in. Make a copy of `development.yml` and `development.env` in `compose` and `envs` directory and rename it (e.g. `production.yml` and `production.env` for production setup). Modify the config files depending on your needs. Set COMPOSE_FILE environment variable to the compose file you are working on so that `Makefile` can load it.
-
-    ```
-    $ export COMPOSE_FILE=production.yml
-    ```
-
-2. Build the containers.
+1. Build and run the containers.
 
     ```
-    $ make build
-    ```
-
-3. Run the containers.
-
-    ```
-    $ make run
+    $ docker-compose -f compose/development.yml build
+    $ docker-compose -f compose/development.yml up -d
     ```
 
 ### Database Setup
@@ -53,13 +42,13 @@ No official record has been tampered/modified.
 1. Run migrations for the default database.
 
     ```
-    $ make migrate
+    $ docker-compose -f compose/development.yml exec api python manage.py migrate
     ```
 
 2. Load database_config fixtures (contains the default config for the WCA databases).
 
     ```
-    $ make dbconfig
+    $ docker-compose -f compose/development.yml exec api python manage.py loaddata database_config
     ```
 
 3. TODO: Initial importing of WCA database.
