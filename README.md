@@ -51,7 +51,11 @@ No official record has been tampered/modified.
     $ docker-compose -f compose/development.yml exec api python manage.py loaddata database_config
     ```
 
-3. TODO: Initial importing of WCA database.
+3. Import WCA database.
+
+    ```
+    $ docker-compose -f compose/staging.yml exec api sh /scripts/sync_wca_database
+    ```
 
 ## Developers
 
