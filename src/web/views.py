@@ -40,8 +40,7 @@ class ContentMixin:
 
     def get_context_data(self, **kwargs):
         context = super(ContentMixin, self).get_context_data(**kwargs)
-        host = self.request.get_host()
-        context['wca_login_uri'] = wca_client.authorize_uri(host)
+        context['wca_login_uri'] = wca_client.authorize_uri()
         context['page'] = self.page
         return context
 
@@ -175,9 +174,7 @@ class WCACallbackView(RedirectView):
         data = self.request.GET
         code = data.get('code')
         redirect_uri = 'web:index'
-
-        host = self.request.get_host()
-        profile_data = wca_client.get_profile(host, code)
+        profile_data = wca_client.get_profile(code)
 
         if not profile_data:
             raise Http404

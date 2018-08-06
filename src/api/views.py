@@ -28,9 +28,7 @@ class WCAAuthenticate(APIView):
     def post(self, request, *args, **kwargs):
         data = request.POST
         code = data.get('code')
-
-        host = self.request.get_host()
-        profile_data = wca_client.get_profile(host, code)
+        profile_data = wca_client.get_profile(code)
 
         if not profile_data:
             return Response({

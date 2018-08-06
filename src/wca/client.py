@@ -38,42 +38,34 @@ class WCAClient:
     def __init__(self):
         self.redis_client = redis.StrictRedis.from_url(settings.REDIS_URL)
 
-    def authorize_uri(self, host):
+    def authorize_uri(self):
         """
         Returns the WCA authorize URI.
-
-        Args:
-            host: The current domain PCA is hosted. Format: domainname.ext
         """
-        redirect_uri = 'http://{}{}'.format(host, settings.WCA_CALLBACK_PATH)
         authorize_uri = (
             '{}authorize/'.format(settings.WCA_OAUTH_URI) +
             '?client_id={}'.format(settings.WCA_CLIENT_ID) +
-            '&redirect_uri={}'.format(redirect_uri) +
+            '&redirect_uri={}'.format(settings.WCA_REDIRECT_URI) +
             '&response_type=code&scope='
         )
         return authorize_uri
 
-    def access_token_uri(self, host, code):
+    def access_token_uri(self, code):
         """
         Returns the WCA access token URI.
-
-        Args:
-            host: The current domain PCA is hosted. Format: domainname.ext
         """
-        redirect_uri = 'http://{}{}'.format(host, settings.WCA_CALLBACK_PATH)
         access_token_uri = (
             '{}token/'.format(settings.WCA_OAUTH_URI) +
             '?client_id={}'.format(settings.WCA_CLIENT_ID) +
             '&client_secret={}'.format(settings.WCA_CLIENT_SECRET) +
-            '&redirect_uri={}'.format(redirect_uri) +
+            '&redirect_uri={}'.format(settings.WCA_REDIRECT_URI) +
             '&code={}'.format(code) +
             '&grant_type=authorization_code'
         )
         return access_token_uri
 
-    def get_profile(self, host, code):
-        access_token_uri = self.access_token_uri(host, code)
+    def get_profile(self, code):
+        access_token_uri = self.access_token_uri(code)
         response = requests.post(access_token_uri)
         access_token = response.json().get('access_token')
 
