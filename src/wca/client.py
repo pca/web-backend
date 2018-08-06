@@ -146,7 +146,7 @@ class WCAClient:
         Enqueues a recomputation job as the queries from the live and
         active databases are long and resource-intensive.
         """
-        q.enqueue(self._recompute_rankings_job, level, query=query, limit=limit)
+        q.enqueue(recompute_rankings_job, level, query=query, limit=limit)
 
     def _get_db_config(self):
         """
@@ -224,29 +224,6 @@ class WCAClient:
 
         return top_results
 
-    def _recompute_rankings_job(self, level, query=None, limit=10):
-        """
-        Recomputes all the rankings by querying the live and active
-        databases and storing it in the cache.
-
-        Args:
-            level: Level can be `national`, `regional`, or `cityprovincial`
-            query: Can be a region code or cityprovincial code
-            limit: The number of results
-        """
-        for event in self.events:
-            # Singles
-            single_records = self._query_records(event, 'best', level, query=query)
-            single_records = self._sanitize_results(single_records, 'best', limit=limit)
-            key = '{}{}{}{}{}'.format(event, 'best', level, query, limit)
-            self.redis_client.set(key, json.dumps(single_records))
-
-            # Average
-            average_records = self._query_records(event, 'average', level, query=query)
-            average_records = self._sanitize_results(average_records, 'average', limit=limit)
-            key = '{}{}{}{}{}'.format(event, 'average', level, query, limit)
-            self.redis_client.set(key, json.dumps(average_records))
-
     def _get_inactive_connection(self):
         db_config = self._get_db_config()
         return connections[db_config['inactive']]
@@ -322,3 +299,27 @@ class WCAClient:
 
 
 wca_client = WCAClient()
+
+
+def recompute_rankings_job(level, query=None, limit=10):
+    """
+    Recomputes all the rankings by querying the live and active
+    databases and storing it in the cache.
+
+    Args:
+        level: Level can be `national`, `regional`, or `cityprovincial`
+        query: Can be a region code or cityprovincial code
+        limit: The number of results
+    """
+    for event in wca_client.events:
+        # Singles
+        single_records = wca_client._query_records(event, 'best', level, query=query)
+        single_records = wca_client._sanitize_results(single_records, 'best', limit=limit)
+        key = '{}{}{}{}{}'.format(event, 'best', level, query, limit)
+        wca_client.redis_client.set(key, json.dumps(single_records))
+
+        # Average
+        average_records = wca_client._query_records(event, 'average', level, query=query)
+        average_records = wca_client._sanitize_results(average_records, 'average', limit=limit)
+        key = '{}{}{}{}{}'.format(event, 'average', level, query, limit)
+        wca_client.redis_client.set(key, json.dumps(average_records))
