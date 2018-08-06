@@ -301,6 +301,8 @@ class WCAClient:
         db.inactive_database = db_config['active']
         db.save()
 
+        return db.active_database
+
     def sync_wca_database(self, download_latest=True, test=False):
         """
         Downloads the latest WCA database dump, imports it in the
