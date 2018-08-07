@@ -4,7 +4,7 @@ Philippine Cubers Association
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![Build Status](https://travis-ci.org/pca/web-backend.svg?branch=master)](https://travis-ci.org/pca/web-backend)
 [![Maintainability](https://api.codeclimate.com/v1/badges/7a8887688397d1cbcd06/maintainability)](https://codeclimate.com/github/pca/web-backend/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/7a8887688397d1cbcd06/test_coverage)](https://codeclimate.com/github/pca/web-backend/test_coverage)
+[![Coverage Status](https://coveralls.io/repos/github/pca/web-backend/badge.svg?branch=master)](https://coveralls.io/github/pca/web-backend?branch=master)
 
 This is the new PCA web repo written in python. Live test server: [https://www.pinoycubers.org/](https://www.pinoycubers.org/)
 
