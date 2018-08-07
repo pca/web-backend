@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 echo "Syncing WCA database from the WCA export"
 printf "Note: This script should be ran inside the docker container\n\n"
 
