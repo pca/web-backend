@@ -232,7 +232,7 @@ class WCAClient:
         # Import the database dump to the inactive table
         connection = self._get_inactive_connection()
         db_django_config = connection.settings_dict
-        sql_location = '/data/WCA_lite.sql'
+        sql_location = '/app/data/WCA_lite.sql'
 
         proc = subprocess.Popen(
             [
