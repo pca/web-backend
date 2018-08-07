@@ -54,17 +54,22 @@ class RankingsAPITestCase(TestCase):
             active_database='wca1',
             inactive_database='wca2',
         )
-        dump_path = 'data/WCA_export.sql'
-        data_dump = Path(dump_path)
-        dump_exists = data_dump.is_file()
-        latest = not dump_exists
-        wca_client.sync_wca_database(download_latest=latest, test=True)
+        wca_client.import_wca_test_database()
 
     def setUp(self):
         self.factory = APIRequestFactory()
 
     def test_national_rankings(self):
         url = reverse('api:national_rankings')
+        request = self.factory.get(url)
+        response = views.ListNationalRankings.as_view()(request)
+        response.render()
+        content = json.loads(response.content)
+        assert 'results' in content
+        assert response.status_code == 200
+
+    def test_national_rankings_selected_events(self):
+        url = reverse('api:national_rankings') + '?events=222,333,444&type=all'
         request = self.factory.get(url)
         response = views.ListNationalRankings.as_view()(request)
         response.render()
@@ -81,6 +86,20 @@ class RankingsAPITestCase(TestCase):
         assert 'results' in content
         assert response.status_code == 200
 
+    def test_regional_rankings_empty_region(self):
+        url = reverse('api:regional_rankings') + '?q='
+        request = self.factory.get(url)
+        response = views.ListRegionalRankings.as_view()(request)
+        response.render()
+        assert response.status_code == 404
+
+    def test_regional_rankings_region_404(self):
+        url = reverse('api:regional_rankings') + '?q=region404notfound'
+        request = self.factory.get(url)
+        response = views.ListRegionalRankings.as_view()(request)
+        response.render()
+        assert response.status_code == 404
+
     def test_city_provincial_rankings(self):
         url = reverse('api:cityprovincial_rankings') + '?q=pasig'
         request = self.factory.get(url)
@@ -89,3 +108,10 @@ class RankingsAPITestCase(TestCase):
         content = json.loads(response.content)
         assert 'results' in content
         assert response.status_code == 200
+
+    def test_city_provincial_rankings_empty_city(self):
+        url = reverse('api:cityprovincial_rankings') + '?q='
+        request = self.factory.get(url)
+        response = views.ListCityProvincialRankings.as_view()(request)
+        response.render()
+        assert response.status_code == 404
