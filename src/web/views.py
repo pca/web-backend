@@ -1,28 +1,23 @@
 """
 XXX: This app is now deprecated in favor of the new api + angular setup.
 """
-import requests
 from datetime import datetime
 
-from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.views import LogoutView
 from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.utils.crypto import get_random_string
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
-from pca.models import User, PCAProfile, WCAProfile
-from pca.mixins import ClientMixin
+from pca.client import pca_client
+from pca.models import WCAProfile
 
-from wca.client import WCAClient
+from wca.client import wca_client
 from web.constants import LOCATION_DIRECTORY, REGION_CHOICES, CITIES_PROVINCES
 from web.constants import NCR, CITY_OF_MANILA
 from web.forms import PCAProfileForm
-
-wca_client = WCAClient()
 
 
 class AuthenticateMixin:
@@ -45,8 +40,7 @@ class ContentMixin:
 
     def get_context_data(self, **kwargs):
         context = super(ContentMixin, self).get_context_data(**kwargs)
-        host = self.request.get_host()
-        context['wca_login_uri'] = wca_client.authorize_uri(host)
+        context['wca_login_uri'] = wca_client.authorize_uri()
         context['page'] = self.page
         return context
 
@@ -170,7 +164,7 @@ class CityProvincialRankingsView(ContentMixin, TemplateView):
         return context
 
 
-class WCACallbackView(ClientMixin, RedirectView):
+class WCACallbackView(RedirectView):
     """
     Validates WCA user, creates a PCA user and a WCA profile
     if the user is new. Otherwise, we just do authentication.
@@ -180,9 +174,7 @@ class WCACallbackView(ClientMixin, RedirectView):
         data = self.request.GET
         code = data.get('code')
         redirect_uri = 'web:index'
-
-        host = self.request.get_host()
-        profile_data = self.pca_client.get_wca_profile(host, code)
+        profile_data = wca_client.get_profile(code)
 
         if not profile_data:
             raise Http404
@@ -191,7 +183,7 @@ class WCACallbackView(ClientMixin, RedirectView):
         wca_profile = WCAProfile.objects.filter(wca_pk=profile_data['id']).first()
 
         if not wca_profile:
-            self.pca_client.create_user(profile_data)
+            pca_client.create_user(profile_data)
 
             # Redirect new users to their profile page
             redirect_uri = 'web:profile'

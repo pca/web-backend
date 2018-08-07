@@ -38,39 +38,42 @@ class WCAClient:
     def __init__(self):
         self.redis_client = redis.StrictRedis.from_url(settings.REDIS_URL)
 
-    def authorize_uri(self, host):
+    def authorize_uri(self):
         """
         Returns the WCA authorize URI.
-
-        Args:
-            host: The current domain PCA is hosted. Format: domainname.ext
         """
-        redirect_uri = 'http://{}{}'.format(host, settings.WCA_CALLBACK_PATH)
         authorize_uri = (
             '{}authorize/'.format(settings.WCA_OAUTH_URI) +
             '?client_id={}'.format(settings.WCA_CLIENT_ID) +
-            '&redirect_uri={}'.format(redirect_uri) +
+            '&redirect_uri={}'.format(settings.WCA_REDIRECT_URI) +
             '&response_type=code&scope='
         )
         return authorize_uri
 
-    def access_token_uri(self, host, code):
+    def access_token_uri(self, code):
         """
         Returns the WCA access token URI.
-
-        Args:
-            host: The current domain PCA is hosted. Format: domainname.ext
         """
-        redirect_uri = 'http://{}{}'.format(host, settings.WCA_CALLBACK_PATH)
         access_token_uri = (
             '{}token/'.format(settings.WCA_OAUTH_URI) +
             '?client_id={}'.format(settings.WCA_CLIENT_ID) +
             '&client_secret={}'.format(settings.WCA_CLIENT_SECRET) +
-            '&redirect_uri={}'.format(redirect_uri) +
+            '&redirect_uri={}'.format(settings.WCA_REDIRECT_URI) +
             '&code={}'.format(code) +
             '&grant_type=authorization_code'
         )
         return access_token_uri
+
+    def get_profile(self, code):
+        access_token_uri = self.access_token_uri(code)
+        response = requests.post(access_token_uri)
+        access_token = response.json().get('access_token')
+
+        response = requests.get(settings.WCA_API_URI + 'me', headers={
+            'Authorization': 'Bearer {}'.format(access_token),
+        })
+        profile = response.json()
+        return profile.get('me')
 
     def competitions(self):
         """
@@ -143,7 +146,7 @@ class WCAClient:
         Enqueues a recomputation job as the queries from the live and
         active databases are long and resource-intensive.
         """
-        q.enqueue(self._recompute_rankings_job, level, query=query, limit=limit)
+        q.enqueue(recompute_rankings_job, level, query=query, limit=limit)
 
     def _get_db_config(self):
         """
@@ -221,52 +224,15 @@ class WCAClient:
 
         return top_results
 
-    def _recompute_rankings_job(self, level, query=None, limit=10):
-        """
-        Recomputes all the rankings by querying the live and active
-        databases and storing it in the cache.
-
-        Args:
-            level: Level can be `national`, `regional`, or `cityprovincial`
-            query: Can be a region code or cityprovincial code
-            limit: The number of results
-        """
-        for event in self.events:
-            # Singles
-            single_records = self._query_records(event, 'best', level, query=query)
-            single_records = self._sanitize_results(single_records, 'best', limit=limit)
-            key = '{}{}{}{}{}'.format(event, 'best', level, query, limit)
-            self.redis_client.set(key, json.dumps(single_records))
-
-            # Average
-            average_records = self._query_records(event, 'average', level, query=query)
-            average_records = self._sanitize_results(average_records, 'average', limit=limit)
-            key = '{}{}{}{}{}'.format(event, 'average', level, query, limit)
-            self.redis_client.set(key, json.dumps(average_records))
-
     def _get_inactive_connection(self):
         db_config = self._get_db_config()
         return connections[db_config['inactive']]
 
-    def _download_wca_dump(self):
-        zip_location = '/data/WCA_export.sql.zip'
-
-        response = requests.get(settings.WCA_EXPORT_URL, stream=True)
-        with open(zip_location, 'wb') as f:
-            shutil.copyfileobj(response.raw, f)
-
-        # Extract zip file
-        with zipfile.ZipFile(zip_location, 'r') as zip_ref:
-            zip_ref.extractall('/data/')
-
-    def _import_wca_dump(self, test=False):
+    def _import_wca_test_dump(self, test=False):
         # Import the database dump to the inactive table
         connection = self._get_inactive_connection()
         db_django_config = connection.settings_dict
-        sql_location = '/data/WCA_export.sql'
-
-        if test:
-            sql_location = '/data/WCA_lite.sql'
+        sql_location = '/app/data/WCA_lite.sql'
 
         proc = subprocess.Popen(
             [
@@ -290,27 +256,50 @@ class WCAClient:
         db.inactive_database = db_config['active']
         db.save()
 
-    def sync_wca_database(self, download_latest=True, test=False):
-        """
-        Downloads the latest WCA database dump, imports it in the
-        inactive wca database, switches the wca databases after the import.
-        Switching means replacing the active database with the inactive one
-        and vice versa.
-        """
-        # TODO: Schedule this method every 1am
-        connection = self._get_inactive_connection()
+        return db.active_database
 
-        if download_latest and not test:
-            self._download_wca_dump()
+    def import_wca_test_database(self):
+        """
+        Imports the WCA_lite test database dump.
+        Note: Should only be used in test cases using test databases.
+        """
+        # connection = self._get_inactive_connection()
 
-        self._import_wca_dump(test=test)
+        self._import_wca_test_dump()
 
         # Create missing primary key (id) on Results table
-        if not test:
-            with connection.cursor() as cursor:
-                cursor.execute('ALTER TABLE Results ADD COLUMN `id` int(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT')
+        # XXX: Temporarily not needed as the test dump already contains `id` column
+        # with connection.cursor() as cursor:
+        #     cursor.execute('ALTER TABLE Results ADD COLUMN `id` int(10) UNSIGNED PRIMARY KEY AUTO_INCREMENT')
 
         self._switch_wca_database()
 
         # Delete cached database config
         self.redis_client.delete('db_config')
+
+
+wca_client = WCAClient()
+
+
+def recompute_rankings_job(level, query=None, limit=10):
+    """
+    Recomputes all the rankings by querying the live and active
+    databases and storing it in the cache.
+
+    Args:
+        level: Level can be `national`, `regional`, or `cityprovincial`
+        query: Can be a region code or cityprovincial code
+        limit: The number of results
+    """
+    for event in wca_client.events:
+        # Singles
+        single_records = wca_client._query_records(event, 'best', level, query=query)
+        single_records = wca_client._sanitize_results(single_records, 'best', limit=limit)
+        key = '{}{}{}{}{}'.format(event, 'best', level, query, limit)
+        wca_client.redis_client.set(key, json.dumps(single_records))
+
+        # Average
+        average_records = wca_client._query_records(event, 'average', level, query=query)
+        average_records = wca_client._sanitize_results(average_records, 'average', limit=limit)
+        key = '{}{}{}{}{}'.format(event, 'average', level, query, limit)
+        wca_client.redis_client.set(key, json.dumps(average_records))

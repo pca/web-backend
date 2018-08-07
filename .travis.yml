@@ -1,40 +1,21 @@
 sudo: required
-language: python
 
 services:
   - docker
 
-before_install:
-  - sudo apt-get install -qq git
-
-install:
-  - pip install python-coveralls
-
 before_script:
-  - sudo service mysql stop
-  - while sudo lsof -Pi :3306 -sTCP:LISTEN -t; do sleep 1; done
   - docker-compose -f compose/development.yml build
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
-  - ./cc-test-reporter before-build
 
-# script
 script:
-  - docker-compose -f compose/development.yml up -d mysql
-  - docker-compose -f compose/development.yml up -d redis
+  - docker-compose -f compose/development.yml up -d mysql redis
+  - sleep 10; # Give time for mysql to initialize
+  - docker-compose -f compose/development.yml up -d api
   - docker ps -a
-  - docker-compose -f compose/development.yml run --rm api coverage run manage.py test
-  - docker ps -a
-  - docker-compose -f compose/development.yml run api ls -lht
-  - docker-compose -f compose/development.yml run --rm api coverage report -m
-  - docker-compose -f compose/development.yml run --rm api coverage xml
-  - docker cp compose_api_run_1:/app/.coverage .coverage
-  - docker cp compose_api_run_1:/app/coverage.xml coverage.xml
+  - docker-compose -f compose/development.yml exec api sh -c "cd ..; coverage run src/manage.py test;"
+  - docker-compose -f compose/development.yml exec api sh -c "cd ..; coverage report -m; coverage xml; ls -lht;"
 
 after_success:
-  - sed -i 's#/app#src#g' .coverage
-  - coveralls
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  - docker-compose -f compose/development.yml exec api sh -c "cd ..; coveralls;"
 
 notifications:
   email:

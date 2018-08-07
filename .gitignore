@@ -6,3 +6,5 @@ envs/staging.env
 compose/production.yml
 compose/staging.yml
 venv/
+*/.coverage
+*/coverage.xml

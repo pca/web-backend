@@ -2,6 +2,7 @@ version: "2"
 services:
   api:
     build: ..
+    image: pca_api
     container_name: pca_api
     command: python manage.py runserver 0.0.0.0:8000
     env_file: ../envs/development.env
@@ -13,11 +14,11 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - ../src:/app
-      - ../data:/data
+      - ..:/app
 
   worker:
     build: ..
+    image: pca_worker
     container_name: pca_worker
     command: python manage.py rqworker default
     env_file: ../envs/development.env
@@ -27,7 +28,7 @@ services:
       - mysql
       - redis
     volumes:
-      - ../src:/app
+      - ..:/app
 
   mysql:
     image: mysql:5.6
@@ -35,6 +36,7 @@ services:
     env_file: ../envs/development.env
     volumes:
       - pca_volume:/var/lib/mysql
+      - ../data/mysql:/docker-entrypoint-initdb.d
 
   redis:
     image: redis:2.8

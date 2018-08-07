@@ -4,7 +4,7 @@ Philippine Cubers Association
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 [![Build Status](https://travis-ci.org/pca/web-backend.svg?branch=master)](https://travis-ci.org/pca/web-backend)
 [![Maintainability](https://api.codeclimate.com/v1/badges/7a8887688397d1cbcd06/maintainability)](https://codeclimate.com/github/pca/web-backend/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/7a8887688397d1cbcd06/test_coverage)](https://codeclimate.com/github/pca/web-backend/test_coverage)
+[![Coverage Status](https://coveralls.io/repos/github/pca/web-backend/badge.svg?branch=master)](https://coveralls.io/github/pca/web-backend?branch=master)
 
 This is the new PCA web repo written in python. Live test server: [https://www.pinoycubers.org/](https://www.pinoycubers.org/)
 
@@ -28,49 +28,34 @@ No official record has been tampered/modified.
 *  [docker](https://www.docker.com/community-edition#/download)
 *  [docker-compose](https://docs.docker.com/compose/install/)
 
-### Config Setup
+### Development Setup
 
-1. Setup configuration depending on the environment you're in. Make a copy of `development.yml` and `development.env` in `compose` and `envs` directory and rename it (e.g. `production.yml` and `production.env` for production setup). Modify the config files depending on your needs. Set COMPOSE_FILE environment variable to the compose file you are working on so that `Makefile` can load it.
-
-    ```
-    $ export COMPOSE_FILE=production.yml
-    ```
-
-2. Build the containers.
+1. Build and run the containers.
 
     ```
-    $ make build
-    ```
-
-3. Run the containers.
-
-    ```
-    $ make run
+    $ docker-compose -f compose/development.yml build
+    $ docker-compose -f compose/development.yml up -d
     ```
 
 ### Database Setup
 
-1. We use three databases for this project. One database for the main database (default), this contains PCA registration and profile customizations. The other two databases are used for the WCA data, one active wca database and one inactive. Importing WCA data takes time and causes service down time so we use the inactive database to import the updated data, then switch it with the active database making it the inactive database and vice versa. The default database is created automatically by the docker container, you need to create `wca1` and `wca2` databases manually.
+1. Run migrations for the default database.
 
     ```
-    $ docker-compose -f <environment>.yml exec mysql mysql -u root -p
-    mysql> CREATE DATABASE wca1;
-    mysql> CREATE DATABASE wca2;
+    $ docker-compose -f compose/development.yml exec api python manage.py migrate
     ```
 
-2. Run migrations for the default database.
+2. Load database_config fixtures (contains the default config for the WCA databases).
 
     ```
-    $ make migrate
+    $ docker-compose -f compose/development.yml exec api python manage.py loaddata database_config
     ```
 
-3. Load database_config fixtures (contains the default config for the WCA databases).
+3. Import WCA database.
 
     ```
-    $ make dbconfig
+    $ docker-compose -f compose/staging.yml exec api sh /scripts/sync_wca_database
     ```
-
-4. TODO: Initial importing of WCA database.
 
 ## Developers
 

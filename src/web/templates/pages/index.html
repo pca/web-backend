@@ -2,33 +2,40 @@
 {% load static %}
 
 {% block content %}
-  <div class="row mt-50">
-    <div class="col">
-      <h1>Philippine Cubers Association</h1>
+  <div class="container" style="margin-top: 80px">
+    <div class="row" style="margin-top: 80px">
+      <div class="col-2" style="margin-top: 20px">
+        <img src="{% static 'img/pca.png' %}" class="img-fluid" alt="PCA Logo">
+      </div>
+      <div class="col" style="margin-top: 20px">
+        <h1 class="display-4">Philippine Cubers Association</h1>
+        <p style="text-indent: 0px">A nonprofit organization that provides successful competitions in different parts of the Philippines, making more people aware of the world of speedcubing, helping more aspiring speedcubers to be the best of themselves, and to be considered as world class competitors in the world of speedcubing. PCA also continues to provide more activities, more friendship and more fun.</p>
+      </div>
     </div>
-  </div>
-  <div class="row mt-30">
-    <div class="col">
-      <p>
-        Philippine Cubers Association is a nonprofit organization that provides successful competitions in different parts of the Philippines, making more people aware of the world of speedcubing, helping more aspiring speedcubers to be the best of themselves, &amp; to be considered as world class competitors in the world of speedcubing.
-      </p>
-      <p>PCA also continues to provide more activities, more friendship and more fun.</p>
-    </div>
-  </div>
-  <div class="row mt-50">
-    <div class="col">
-      <h1>History</h1>
-    </div>
-  </div>
-  <div class="row mt-30 mb-50">
-    <div class="col">
-      <p class="indent">The association started in August 2004 as a simple account in a certain internet social network service known as the Rubik’s Cube Solvers Society, also known as RCSS, with a profile name Rubik’s Cube. It was founded by Raphael Jan Ferraris, JMson Calalang, John and JB Cañares. Among its enthusiastic pioneering members were Benjamin Jose Enriquez, Jeremy Nable, Amiel Buenaventura Jr., Albert Romero, Jonathan Papa, Lester Santos, Fritz Briones, and Norman Mijares. The initial goal was to gather every cuber in the country but later proved to be a gathering of less-enthusiastic cubers.</p>
-      <p class="indent">By February 17, 2007 a person working for a media contacted JB Cañares and presented a plausible plan to make speedcubing big in the Philippines by which the founders and the enthusiastic members of the society took an interest. The opportunity did not materialize due to lack of communication and differences in location of members. But it was in March 2007 when John Cañares made a film documentary entitled Pinoy Cuber Documentary, regarding the lives of speedcubers in the Philippines. The documentary was sent to the World Cube Association (WCA) via net, and luckily Ron Van Bruchem, a member of the WCA board liked the film, later passed instructions to the Filipino speedcubers to gather at least 12 competitors and considered sending a WCA delegate if ever this was accomplished.</p>
-      <p class="indent">In response, JB Cañares soon announced the news online and gave instructions to Fritz Briones to open a Group account in the same social network service to take advantage of its forum feature. The Group was established on March 11, 2007 and was initially named Pinoy Cubers Association and was later changed to Philippine Cubers Association (PCA) . Jonathan Papa made a logo for the group and it’s been the official logo since then. It catered to interested cubers regarding the competition and later took the initiative. Among the pioneering members were, Jan Jerome Bautista, Isagani Esteron, Lyn Uy, Lester Santos and so many others not mentioned.</p>
-      <p class="indent">In early 2007, Mat Almeida, a Portuguese &amp; half Filipino appeared on national television and introduced speedcubing to the Philippines. Having participated in different speedcubing tournaments outside the country, Mat was already a seasoned speedcuber. Being aware a possible local competition was being organized, he soon later joined PCA to help.</p>
-      <p class="indent">Jonathan Papa and Lester Santos proposed for the creation of an official website in April 2007, but were later delayed due to financial difficulties.</p>
-      <p class="indent">By June 23, 2007, Lester Santos created a forum website and was immediately approved by the group. The forum was a success, and soon gathered twice the number from the previous site. The initial plans mostly took place in Manila, with Mat Almeida, Jonathan Papa, and Lester Santos as head organizers. The plan was gradually solidifying and soon Mat convinced Ron Van Bruchem to make him as a WCA delegate for the said event. This news immediately pushed the advancement further into laying out the final planning of the competition.</p>
-      <p class="indent">Mat Almeida reappeared on national television on June 28, 2007 to promote the association and announced the upcoming Rubik’s Cube Philippine Open 2007, the first speedcubing competition in the country which was recognized by WCA. When the first Philippine Open was finalized, it was then scheduled to take place in August 25, 2007. With its success, it gathered huge attention to cubing enthusiasts and then PCA has begun growing exponentially. The competition also gained media exposure to speedcubing in the Philippines. PCA continues to grow until now, providing more successful competitions in different parts of the Philippines, making more people aware of the world of speedcubing, helping more aspiring speedcubers to be the best of themselves, &amp; to be considered as world class competitors in the world of speedcubing. PCA also continues to provide more activities, more friendship and more fun.</p>
+
+    <hr class="my-2">
+
+    <div class="row mt-4">
+      <div class="col">
+        <div class="embed-responsive embed-responsive-16by9">
+          <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/TbkF92DH0oM" allowfullscreen></iframe>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card text-center">
+          <div class="card-header">Upcoming Competition</div>
+          <div class="card-body">
+            <h3>CaMaNaVa Open 2018</h3>
+            <ul class="list-unstyled">
+              <li>Valenzuela City, Metro Manila</li>
+              <li>August 18 - 19, 2018</li>
+            </ul>
+            <div><a href="#">Register</a></div>
+            <div><a href="{% url 'web:competitions' %}">View all upcoming competitions</a></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 {% endblock %}
