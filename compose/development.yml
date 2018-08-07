@@ -8,6 +8,9 @@ services:
     env_file: ../envs/development.env
     environment:
       PYTHONUNBUFFERED: 1
+      TRAVIS_JOB_ID: $TRAVIS_JOB_ID
+      TRAVIS_BRANCH: $TRAVIS_BRANCH
+      COVERALLS_REPO_TOKEN: $COVERALLS_REPO_TOKEN
     links:
       - mysql
       - redis
