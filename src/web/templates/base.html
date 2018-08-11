@@ -68,7 +68,7 @@
             <ul class="navbar-nav mr-right">
               {% if user.is_authenticated %}
                 <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle" href="#" id="profile-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ user.wcaprofile }}</a>
+                  <a class="nav-link dropdown-toggle" href="#" id="profile-dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="{{ user.wcaprofile.avatar_thumb_url }}" width="30" height="30" class="rounded-circle" alt="Avatar"> {{ user.wcaprofile }}</a>
                   <div class="dropdown-menu" aria-labelledby="profile-dropdown">
                     <a class="dropdown-item{% if page == 'profile' %} active{% endif %}" href="{% url 'web:profile' %}">Profile</a>
                     <a class="dropdown-item" href="{% url 'web:logout' %}">Logout</a>
