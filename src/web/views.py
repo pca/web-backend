@@ -151,7 +151,7 @@ class RegionalRankingsView(ContentMixin, TemplateView):
             'label': region['label'],
         }
         context['region_choices'] = REGION_CHOICES
-        context['all_rankings'] = wca_client.all_rankings('regional', query=region)
+        context['all_rankings'] = wca_client.all_rankings('regional', query=region_key)
         return context
 
 
