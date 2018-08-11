@@ -1,8 +1,7 @@
 import json
 import requests
-import shutil
 import subprocess
-import zipfile
+from datetime import datetime
 
 import django_rq as q
 import redis
@@ -93,6 +92,25 @@ class WCAClient:
         self.redis_client.set('competitions', json.dumps(competitions), 600)
 
         return competitions
+
+    def upcoming_competitions(self):
+        """
+        Returns the list of upcoming competitions in the Philippines.
+        """
+        competitions = self.competitions()
+        upcoming_competitions = []
+
+        # Filter upcoming competitions
+        for competition in competitions:
+            start_date = datetime.strptime(competition['start_date'], '%Y-%m-%d')
+
+            if start_date > datetime.today():
+                end_date = datetime.strptime(competition['end_date'], '%Y-%m-%d')
+                competition['start_date'] = start_date.strftime('%B %d, %Y')
+                competition['end_date'] = end_date.strftime('%B %d, %Y')
+                upcoming_competitions.insert(0, competition)
+
+        return upcoming_competitions
 
     def all_rankings(self, level, query=None, limit=10):
         """

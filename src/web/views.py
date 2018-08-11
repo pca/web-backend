@@ -1,8 +1,6 @@
 """
 XXX: This app is now deprecated in favor of the new api + angular setup.
 """
-from datetime import datetime
-
 from django.contrib.auth import login
 from django.contrib.auth.views import LogoutView
 from django.http import Http404
@@ -101,19 +99,7 @@ class CompetitionsView(ContentMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(CompetitionsView, self).get_context_data(**kwargs)
-        competitions = wca_client.competitions()
-        upcoming_competitions = []
-
-        # Filter upcoming competitions
-        for competition in competitions:
-            start_date = datetime.strptime(competition['start_date'], '%Y-%m-%d')
-
-            if start_date > datetime.today():
-                end_date = datetime.strptime(competition['end_date'], '%Y-%m-%d')
-                competition['start_date'] = start_date.strftime('%B %d, %Y')
-                competition['end_date'] = end_date.strftime('%B %d, %Y')
-                upcoming_competitions.insert(0, competition)
-
+        upcoming_competitions = wca_client.upcoming_competitions()
         context['upcoming_competitions'] = upcoming_competitions
         return context
 
