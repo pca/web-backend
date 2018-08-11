@@ -158,6 +158,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # Override default user model
 
@@ -194,6 +196,7 @@ RAVEN_CONFIG = {
 }
 
 # Nose Test Runner
+
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = ['--with-spec', '--spec-color']
 
