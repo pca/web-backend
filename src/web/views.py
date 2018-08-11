@@ -106,9 +106,12 @@ class CompetitionsView(ContentMixin, TemplateView):
 
         # Filter upcoming competitions
         for competition in competitions:
-            start_date = datetime.strptime(competition['start_date'], "%Y-%m-%d")
+            start_date = datetime.strptime(competition['start_date'], '%Y-%m-%d')
 
             if start_date > datetime.today():
+                end_date = datetime.strptime(competition['end_date'], '%Y-%m-%d')
+                competition['start_date'] = start_date.strftime('%B %d, %Y')
+                competition['end_date'] = end_date.strftime('%B %d, %Y')
                 upcoming_competitions.insert(0, competition)
 
         context['upcoming_competitions'] = upcoming_competitions

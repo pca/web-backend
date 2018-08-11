@@ -16,7 +16,11 @@
           <h3><a href="{{ competition.website }}" target="_blank">{{ competition.name }}</a></h3>
           <ul class="list-unstyled">
             <li>{{ competition.city }}</li>
-            <li>{{ competition.start_date }} to {{ competition.end_date }}</li>
+            {% if competition.start_date == competition.end_date %}
+              <li>{{ competition.start_date }}</li>
+            {% else %}
+              <li>{{ competition.start_date }} to {{ competition.end_date }}</li>
+            {% endif %}
           </ul>
         </div>
         <div class="col-2">
