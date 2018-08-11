@@ -13,27 +13,40 @@
     {% for competition in upcoming_competitions %}
       <div class="row">
         <div class="col-5">
-          <h3><a href="{{ competition.website }}">{{ competition.name }}</a></h3>
+          <h3><a href="{{ competition.website }}" target="_blank">{{ competition.name }}</a></h3>
           <ul class="list-unstyled">
             <li>{{ competition.city }}</li>
-            <li>{{ competition.start_date }} to {{ competition.end_date }}</li>
+            {% if competition.start_date == competition.end_date %}
+              <li>{{ competition.start_date }}</li>
+            {% else %}
+              <li>{{ competition.start_date }} to {{ competition.end_date }}</li>
+            {% endif %}
           </ul>
         </div>
         <div class="col-2">
           <h4>Delegates</h4>
-          <img width="50px" height="50px" class="rounded-circle" src="https://www.worldcubeassociation.org/uploads/user/avatar/2010UBAL01/1506331030_thumb.jpg" alt="Delegate">
-          <img width="50px" height="50px" class="rounded-circle" src="https://www.worldcubeassociation.org/uploads/user/avatar/2014LAGA02/1530177072_thumb.jpg" alt="Delegate">
+          {% for delegate in competition.delegates %}
+            <a href="{{ delegate.url }}" target="_blank"><img width="50px" height="50px" class="rounded-circle" src="{{ delegate.avatar.thumb_url }}" alt="{{ delegate.name }}" data-toggle="tooltip" data-placement="bottom" title="{{ delegate.name }}"></a>
+          {% endfor %}
         </div>
         <div class="col-3">
           <h4>Organizers</h4>
-          <img width="50px" height="50px" class="rounded-circle" src="https://www.worldcubeassociation.org/uploads/user/avatar/2012LALO01/1479956163_thumb.JPG" alt="Organizer">
-          <img width="50px" height="50px" class="rounded-circle" src="https://www.worldcubeassociation.org/uploads/user/avatar/2015YUNE01/1497874522_thumb.jpeg" alt="Organizer">
-          <img width="50px" height="50px" class="rounded-circle" src="https://www.worldcubeassociation.org/uploads/user/avatar/2017ACAN02/1513673671_thumb.jpg" alt="Organizer">
+          {% for organizer in competition.organizers %}
+            <a href="{{ organizer.url }}" target="_blank"><img width="50px" height="50px" class="rounded-circle" src="{{ organizer.avatar.thumb_url }}" alt="{{ organizer.name }}" data-toggle="tooltip" data-placement="bottom" title="{{ organizer.name }}"></a>
+          {% endfor %}
         </div>
         <div class="col text-right">
-          <a href="{{ competition.website }}/register" class="btn btn-primary" style="margin-top: 25px; margin-right: 18px">Register</a>
+          <a href="{{ competition.website }}/register" target="_blank" class="btn btn-primary" style="margin-top: 25px; margin-right: 18px">Register</a>
         </div>
       </div>
     {% endfor %}
   </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    })
+  </script>
 {% endblock %}

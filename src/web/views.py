@@ -1,8 +1,6 @@
 """
 XXX: This app is now deprecated in favor of the new api + angular setup.
 """
-from datetime import datetime
-
 from django.contrib.auth import login
 from django.contrib.auth.views import LogoutView
 from django.http import Http404
@@ -45,6 +43,14 @@ class ContentMixin:
         return context
 
 
+class UserLoginView(RedirectView):
+    """
+    Redirects the user to the WCA login page.
+    """
+    def get_redirect_url(self, *args, **kwargs):
+        return wca_client.authorize_uri()
+
+
 class UserLogoutView(LogoutView):
     next_page = 'web:index'
 
@@ -52,6 +58,17 @@ class UserLogoutView(LogoutView):
 class IndexView(ContentMixin, TemplateView):
     template_name = 'pages/index.html'
     page = 'index'
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        upcoming_competitions = wca_client.upcoming_competitions()
+        upcoming_competition = None
+
+        if len(upcoming_competitions) > 0:
+            upcoming_competition = upcoming_competitions[0]
+
+        context['upcoming_competition'] = upcoming_competition
+        return context
 
 
 class ProfileView(AuthenticateMixin, ContentMixin, TemplateView):
@@ -101,16 +118,7 @@ class CompetitionsView(ContentMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(CompetitionsView, self).get_context_data(**kwargs)
-        competitions = wca_client.competitions()
-        upcoming_competitions = []
-
-        # Filter upcoming competitions
-        for competition in competitions:
-            start_date = datetime.strptime(competition['start_date'], "%Y-%m-%d")
-
-            if start_date > datetime.today():
-                upcoming_competitions.insert(0, competition)
-
+        upcoming_competitions = wca_client.upcoming_competitions()
         context['upcoming_competitions'] = upcoming_competitions
         return context
 
@@ -143,7 +151,7 @@ class RegionalRankingsView(ContentMixin, TemplateView):
             'label': region['label'],
         }
         context['region_choices'] = REGION_CHOICES
-        context['all_rankings'] = wca_client.all_rankings('regional', query=region)
+        context['all_rankings'] = wca_client.all_rankings('regional', query=region_key)
         return context
 
 
