@@ -1,100 +1,68 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="row mt-50">
-    <div class="col-sm-3">
+<div class="container" style="margin-top: 100px">
+  <div class="row">
+
+    <div class="col-3">
       <div class="card">
-        <img class="card-img-top" src="{{ user.wcaprofile.avatar_thumb_url }}">
         <div class="card-body">
-          <h5 class="card-title">{{ user.wcaprofile.name }}</h5>
-          <p class="card-text">
+          <img src="{{ user.wcaprofile.avatar_thumb_url }}" alt="{{ user.wcaprofile.name }}" class="img-fluid">
+
+          <hr>
+
+          <ul class="list-unstyled">
+            <li><h3>{{ user.wcaprofile.name }}</h3></li>
             {% if user.wcaprofile.wca_id %}
-              WCA ID: {{ user.wcaprofile.wca_id }}
-            {% else %}
-              No WCA ID yet
+              <li><a href="https://www.worldcubeassociation.org/persons/{{ user.wcaprofile.wca_id }}" target="_blank">{{ user.wcaprofile.wca_id }}</a></li>
             {% endif %}
-          </p>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card mt-3">
+        <div class="card-body">
+          <h4>Account Settings</h4>
+          <hr>
+          <form action="{% url 'web:profile' %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="{{ form.region.id_for_label }}">Region:</label>
+              <select name="{{ form.region.name }}" required id="{{ form.region.id_for_label }}" class="form-control">
+                {% for value, label in form.fields.region.choices %}
+                  {% if form.region.value == value %}
+                    <option value="{{ value }}" selected>{{ value }} - {{ label }}</option>
+                  {% else %}
+                    <option value="{{ value }}">{{ value }} - {{ label }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn btn-default">Save</button>
+          </form>
         </div>
       </div>
     </div>
+
     <div class="col">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Details</h5>
-          <p class="card-text">
-            <p>Joined WCA: {{ user.wcaprofile.wca_created_at }}</p>
-            <p>Joined PCA: {{ user.date_joined }}</p>
-            <hr>
-            <form action="{% url 'web:profile' %}" method="post">
-              {% csrf_token %}
-              <div class="form-group">
-                <label for="{{ form.region.id_for_label }}">Region:</label>
-                <select name="{{ form.region.name }}" required id="{{ form.region.id_for_label }}" class="form-control">
-                  {% for value, label in form.fields.region.choices %}
-                    {% if form.region.value == value %}
-                      <option value="{{ value }}" selected>{{ value }} - {{ label }}</option>
-                    {% else %}
-                      <option value="{{ value }}">{{ value }} - {{ label }}</option>
-                    {% endif %}
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="{{ form.city_province.id_for_label }}">City/Province:</label>
-                <select name="{{ form.city_province.name }}" required id="{{ form.city_province.id_for_label }}" class="form-control">
-                  <option value="" selected>---------</option>
-                </select>
-              </div>
-              <button type="submit" class="btn btn-default">Save</button>
-            </form>
-          </p>
+          <h3>Personal Records</h3>
+
+          <table class="table mt-4">
+            <thead>
+              <tr>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
-{% endblock %}
-
-{% block scripts %}
-  <script>
-    $(document).ready(function() {
-      var CITIES_PROVINCES_DIRECTORY = {{ location_directory|safe }};
-
-      var initial_region = '{{ form.region.value }}';
-      var initial_city_province = '{{ form.city_province.value }}';
-
-      var initial_cities_provinces = CITIES_PROVINCES_DIRECTORY[initial_region];
-
-      // Only access 'cities_provinces' if initial_region is existing
-      if (initial_cities_provinces) {
-        initial_cities_provinces = initial_cities_provinces['cities_provinces'];
-      }
-
-      // Insert initial cities/provinces within the initial region
-      $.each(initial_cities_provinces, function(index, city_province) {
-        $('#id_city_province').append('<option value="' + city_province + '" selected>' + city_province + '</option>');
-      })
-
-      // Set current city/province
-      $('#id_city_province option[value="' + initial_city_province + '"]').prop('selected', true);
-
-      $('#id_region').change(function() {
-        // Clear city/provinces
-        $('#id_city_province').empty();
-
-        var region = $(this).val();
-        var cities_provinces = CITIES_PROVINCES_DIRECTORY[region]['cities_provinces'];
-
-        // Insert blank option
-        $('#id_city_province').append('<option value="" selected>---------</option>');
-
-        // Insert cities/provinces within the selected region
-        $.each(cities_provinces, function(index, city_province) {
-          $('#id_city_province').append('<option value="' + city_province + '" selected>' + city_province + '</option>');
-        })
-
-        // Set default selected city/province to blank
-        $('#id_city_province option[value=""]').prop('selected', true);
-      });
-    })
-  </script>
 {% endblock %}
