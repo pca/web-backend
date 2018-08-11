@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'wca',
     'pca',
     'api',
+    'pages',
 ]
 
 MIDDLEWARE = [
