@@ -54,7 +54,7 @@ No official record has been tampered/modified.
 3. Import WCA database.
 
     ```
-    $ docker-compose -f compose/staging.yml exec api sh /scripts/sync_wca_database
+    $ docker-compose -f compose/staging.yml exec api sh /app/scripts/sync_wca_database
     ```
 
 ## Developers
