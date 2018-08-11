@@ -43,6 +43,14 @@ class ContentMixin:
         return context
 
 
+class UserLoginView(RedirectView):
+    """
+    Redirects the user to the WCA login page.
+    """
+    def get_redirect_url(self, *args, **kwargs):
+        return wca_client.authorize_uri()
+
+
 class UserLogoutView(LogoutView):
     next_page = 'web:index'
 

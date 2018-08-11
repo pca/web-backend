@@ -5,6 +5,7 @@ from web import views
 app_name = 'web'
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
+    path('login/', views.UserLoginView.as_view(), name='login'),
     path('logout/', views.UserLogoutView.as_view(), name='logout'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('competitions/', views.CompetitionsView.as_view(), name='competitions'),

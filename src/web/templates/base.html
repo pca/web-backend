@@ -76,7 +76,7 @@
                 </li>
               {% else %}
                 <li class="nav-item">
-                  <a class="nav-link" href="{{ wca_login_uri }}"><img src="{% static 'img/wca.svg' %}" width="30" height="30" alt="WCA Logo"> WCA Login</a>
+                  <a class="nav-link" href="{% url 'web:login' %}"><img src="{% static 'img/wca.svg' %}" width="30" height="30" alt="WCA Logo"> WCA Login</a>
                 </li>
               {% endif %}
             </ul>
