@@ -9,7 +9,7 @@ urlpatterns = [
 
     # Locations
     path('regions/', views.ListRegions.as_view(), name='regions'),
-    path('citiesprovinces/', views.ListCitiesProvinces.as_view(), name='citiesprovinces'),
+    # path('citiesprovinces/', views.ListCitiesProvinces.as_view(), name='citiesprovinces'),
 
     # Competitions
     path('competitions/', views.ListCompetitions.as_view(), name='competitions'),
@@ -17,5 +17,5 @@ urlpatterns = [
     # Rankings
     path('rankings/national/', views.ListNationalRankings.as_view(), name='national_rankings'),
     path('rankings/regional/', views.ListRegionalRankings.as_view(), name='regional_rankings'),
-    path('rankings/cityprovincial/', views.ListCityProvincialRankings.as_view(), name='cityprovincial_rankings'),
+    # path('rankings/cityprovincial/', views.ListCityProvincialRankings.as_view(), name='cityprovincial_rankings'),
 ]
