@@ -51,6 +51,17 @@ class IndexView(ContentMixin, TemplateView):
     template_name = 'pages/index.html'
     page = 'index'
 
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        upcoming_competitions = wca_client.upcoming_competitions()
+        upcoming_competition = None
+
+        if len(upcoming_competitions) > 0:
+            upcoming_competition = upcoming_competitions[0]
+
+        context['upcoming_competition'] = upcoming_competition
+        return context
+
 
 class ProfileView(AuthenticateMixin, ContentMixin, TemplateView):
     template_name = 'pages/profile.html'
