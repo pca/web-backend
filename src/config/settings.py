@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'pca',
     'api',
     'pages',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -109,6 +110,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
+DATABASE_ROUTERS = ['core.routers.DatabaseRouter']
 DATABASES = {
     'default': dj_database_url.config(),
     'wca1': dj_database_url.parse(os.getenv('WCA1_DATABASE_URL')),
