@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% load wagtailcore_tags %}
+
+{% block body_class %}template-blogindexpage{% endblock %}
+
+{% block content %}
+  <div class="container" style="margin-top: 80px">
+    <div class="row" style="margin-top: 110px">
+      <div class="col-3">
+        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+          <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">All</a>
+          <a class="nav-link" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">Competitions</a>
+          <a class="nav-link" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">Announcements</a>
+          <a class="nav-link" id="v-pills-home-tab" data-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">Tutorials</a>
+        </div>
+      </div>
+
+      <div class="col border-left">
+        {% for post in page.get_children %}
+          <div class="row mb-4">
+            <div class="col">
+              <h2>{{ post.title }}</h2>
+              <ul class="list-unstyled ml-3">
+                <li>{% include 'pages/_blog_date_categories.html' with page=post.specific %}</li>
+                {% if post.specific.tags.all.count %}
+                  <li>{% include 'pages/_blog_tags.html' with page=post.specific %}</li>
+                {% endif %}
+              </ul>
+              <p>{{ post.specific.body|slice:":255"|richtext }}</p>
+              <br>
+              <a href="{% pageurl post %}">Read more</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

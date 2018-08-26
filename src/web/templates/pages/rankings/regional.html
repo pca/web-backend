@@ -2,21 +2,34 @@
 {% load static %}
 
 {% block content %}
-  <div class="container" style="margin-top: 100px">
-    <div class="row mt-50 mb-50">
+  <div class="container" style="margin-top: 80px">
+    <div class="row" style="margin-top: 100px">
       <div class="col">
-        <h3>Regions</h3>
-        <div class="list-group">
+        <h1><span class="fa fa-line-chart"></span> Regional Ranking (Unofficial)</h1>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="row">
+      <div class="col-2 border-right">
+        <div class="nav flex-column nav-pills text-center">
           {% for region_choice in region_choices %}
-            <a href="{% url 'web:regional_rankings' %}?region={{ region_choice.0 }}" class="list-group-item list-group-item-action{% if region.key == region_choice.0 %} active{% endif %}">{{ region_choice.0 }}</a>
+            <a href="{% url 'web:regional_rankings' %}?region={{ region_choice.0 }}" class="nav-link{% if region.key == region_choice.0 %} active{% endif %}">{{ region_choice.0 }}</a>
           {% endfor %}
         </div>
       </div>
-      <div class="col-10">
-        <h3>Regional Ranking ({{ region.label }})</h3>
-        <hr>
-        {% include 'pages/rankings/_events.html' %}
-      </div>
+
+      {% include 'pages/rankings/_events.html' %}
     </div>
   </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    $('#c333nav a').on('click', function (e) {
+      e.preventDefault()
+      $(this).tab('show')
+    })
+  </script>
 {% endblock %}

@@ -45,12 +45,30 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_rq',
     'django_nose',
-    
+
+    # Wagtail
+    'wagtail.contrib.forms',
+    'wagtail.contrib.redirects',
+    'wagtail.embeds',
+    'wagtail.sites',
+    'wagtail.users',
+    'wagtail.snippets',
+    'wagtail.documents',
+    'wagtail.images',
+    'wagtail.search',
+    'wagtail.admin',
+    'wagtail.core',
+
+    'modelcluster',
+    'taggit',
+
     # Project-defined apps
     'web',  # XXX: Deprecated
     'wca',
     'pca',
     'api',
+    'pages',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -61,6 +79,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'wagtail.core.middleware.SiteMiddleware',
+    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -68,7 +89,9 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -87,6 +110,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
+DATABASE_ROUTERS = ['core.routers.DatabaseRouter']
 DATABASES = {
     'default': dj_database_url.config(),
     'wca1': dj_database_url.parse(os.getenv('WCA1_DATABASE_URL')),
@@ -131,9 +155,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # Override default user model
@@ -171,5 +198,11 @@ RAVEN_CONFIG = {
 }
 
 # Nose Test Runner
+
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = ['--with-spec', '--spec-color']
+
+
+# Wagtail
+
+WAGTAIL_SITE_NAME = 'PCA'

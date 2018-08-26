@@ -1,0 +1,12 @@
+{% load wagtailcore_tags %}
+
+<small class="text-muted">
+  <span>Tags: </span>
+  {% for tag in page.tags.all %}
+    {% if forloop.last %}
+      <a href="{% slugurl 'blog' %}?tag={{ tag }}">{{ tag }}</a>
+    {% else %}
+      <a href="{% slugurl 'blog' %}?tag={{ tag }}">{{ tag }}</a>,
+    {% endif %}
+  {% endfor %}
+</small>

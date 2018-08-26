@@ -26,13 +26,21 @@
         <div class="card text-center">
           <div class="card-header">Upcoming Competition</div>
           <div class="card-body">
-            <h3>CaMaNaVa Open 2018</h3>
-            <ul class="list-unstyled">
-              <li>Valenzuela City, Metro Manila</li>
-              <li>August 18 - 19, 2018</li>
-            </ul>
-            <div><a href="#">Register</a></div>
-            <div><a href="{% url 'web:competitions' %}">View all upcoming competitions</a></div>
+            {% if upcoming_competition %}
+              <h3>{{ upcoming_competition.name }}</h3>
+              <ul class="list-unstyled">
+                <li>{{ upcoming_competition.city }}</li>
+                {% if upcoming_competition.start_date == upcoming_competition.end_date %}
+                  <li>{{ upcoming_competition.start_date }}</li>
+                {% else %}
+                  <li>{{ upcoming_competition.start_date }} to {{ upcoming_competition.end_date}}</li>
+                {% endif %}
+              </ul>
+              <div><a href="{{ upcoming_competition.website }}/register" target="_blank">Register</a></div>
+              <div><a href="{% url 'web:competitions' %}">View all upcoming competitions</a></div>
+            {% else %}
+              <p>No upcoming competition yet.</p>
+            {% endif %}
           </div>
         </div>
       </div>
