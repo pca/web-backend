@@ -27,7 +27,7 @@
                   <li>{% include 'pages/_blog_tags.html' with page=post.specific %}</li>
                 {% endif %}
               </ul>
-              {{ post.specific.intro }}
+              <p>{{ post.specific.body|slice:":255"|richtext }}</p>
               <br>
               <a href="{% pageurl post %}">Read more</a>
             </div>
