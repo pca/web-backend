@@ -1,0 +1,21 @@
+<small class="text-muted">
+  <span>{{ page.date }}</span>
+
+  {% with categories=page.categories.all %}
+    {% if categories %}
+      <span> in </span>
+
+      {% for category in categories %}
+        {% if forloop.last %}
+          {% if categories|length > 1 %}
+            <span>and</span>
+          {% endif %}
+          <a href="#">{{ category.name }}</a>
+        {% else %}
+          <a href="#">{{ category.name }}</a>,
+        {% endif %}
+      {% endfor %}
+
+    {% endif %}
+  {% endwith %}
+</small>
