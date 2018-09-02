@@ -10,6 +10,7 @@ from django.db import connections
 from django.db.models import Q
 
 from wca.models import Result
+from wca.scrapers import scrape_competition
 from pca.models import WCAProfile, DatabaseConfig
 
 
@@ -74,19 +75,56 @@ class WCAClient:
         profile = response.json()
         return profile.get('me')
 
-    def competitions(self):
-        """
-        Returns the list of all competitions in the Philippines.
-        """
+    def get_competition_data(self):
         # Try to fetch data from cache
         competitions = self.redis_client.get('competitions')
 
         if competitions:
-            return json.loads(competitions)
+            competitions = json.loads(competitions)
+        else:
+            # Fetch competitions from the WCA API
+            response = requests.get('https://www.worldcubeassociation.org/api/v0/search/competitions?q=philippines')
+            competitions = response.json()['result']
 
-        # Fetch competitions from the WCA API
-        response = requests.get('https://www.worldcubeassociation.org/api/v0/search/competitions?q=philippines')
-        competitions = response.json()['result']
+        # Try to fetch additional data from cache
+        additional_competitions_data = self.redis_client.get('additional_competitions_data')
+
+        if additional_competitions_data:
+            additional_competitions_data = json.loads(additional_competitions_data)
+            has_new_entry = False
+
+            for competition in competitions:
+                if competition['id'] not in additional_competitions_data.keys():
+                    data = scrape_competition(competition['url'])
+                    competition['additional_data'] = data
+                    additional_competitions_data[competition['id']] = data
+                    has_new_entry = True
+
+            if has_new_entry:
+                self.redis_client.set(
+                    'additional_competitions_data',
+                    json.dumps(additional_competitions_data),
+                )
+        else:
+            additional_competitions_data = {}
+
+            for competition in competitions:
+                data = scrape_competition(competition['url'])
+                competition['additional_data'] = data
+                additional_competitions_data[competition['id']] = data
+
+            self.redis_client.set(
+                'additional_competitions_data',
+                json.dumps(additional_competitions_data),
+            )
+
+        return competitions
+
+    def competitions(self):
+        """
+        Returns the list of all competitions in the Philippines.
+        """
+        competitions = self.get_competition_data()
 
         # Cache the result for 10 minutes (600 seconds)
         self.redis_client.set('competitions', json.dumps(competitions), 600)
