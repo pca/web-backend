@@ -23,14 +23,14 @@ class LocationAPITestCase(TestCase):
         assert 'results' in content
         assert response.status_code == 200
 
-    def test_list_citiesprovinces(self):
-        url = reverse('api:citiesprovinces')
-        request = self.factory.get(url)
-        response = views.ListCitiesProvinces.as_view()(request)
-        response.render()
-        content = json.loads(response.content)
-        assert 'results' in content
-        assert response.status_code == 200
+    # def test_list_citiesprovinces(self):
+    #     url = reverse('api:citiesprovinces')
+    #     request = self.factory.get(url)
+    #     response = views.ListCitiesProvinces.as_view()(request)
+    #     response.render()
+    #     content = json.loads(response.content)
+    #     assert 'results' in content
+    #     assert response.status_code == 200
 
 
 class CompetitionsAPITestCase(TestCase):
@@ -100,18 +100,18 @@ class RankingsAPITestCase(TestCase):
         response.render()
         assert response.status_code == 404
 
-    def test_city_provincial_rankings(self):
-        url = reverse('api:cityprovincial_rankings') + '?q=pasig'
-        request = self.factory.get(url)
-        response = views.ListCityProvincialRankings.as_view()(request)
-        response.render()
-        content = json.loads(response.content)
-        assert 'results' in content
-        assert response.status_code == 200
+    # def test_city_provincial_rankings(self):
+    #     url = reverse('api:cityprovincial_rankings') + '?q=pasig'
+    #     request = self.factory.get(url)
+    #     response = views.ListCityProvincialRankings.as_view()(request)
+    #     response.render()
+    #     content = json.loads(response.content)
+    #     assert 'results' in content
+    #     assert response.status_code == 200
 
-    def test_city_provincial_rankings_empty_city(self):
-        url = reverse('api:cityprovincial_rankings') + '?q='
-        request = self.factory.get(url)
-        response = views.ListCityProvincialRankings.as_view()(request)
-        response.render()
-        assert response.status_code == 404
+    # def test_city_provincial_rankings_empty_city(self):
+    #     url = reverse('api:cityprovincial_rankings') + '?q='
+    #     request = self.factory.get(url)
+    #     response = views.ListCityProvincialRankings.as_view()(request)
+    #     response.render()
+    #     assert response.status_code == 404

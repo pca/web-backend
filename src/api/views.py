@@ -112,7 +112,7 @@ class ListCompetitions(APIView):
 
     def get(self, request, *args, **kwargs):
         data = {
-            'results': wca_client.competitions(),
+            'results': wca_client.upcoming_competitions(),
         }
         return Response(data)
 
