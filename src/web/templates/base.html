@@ -139,20 +139,55 @@
               <li class="nav-item">
                 <a class="nav-link{% if page == 'index' %} active{% endif %}" href="{% url 'web:index' %}">Home</a>
               </li>
-              <li class="nav-item">
-                <a class="nav-link{% if page == 'competitions' %} active{% endif %}" href="{% url 'web:competitions' %}">Competitions</a>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="aboutDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  About
+                </a>
+                <div class="dropdown-menu" aria-labelledby="aboutDropdown">
+                  <a class="dropdown-item" href="#">About - Summary</a>
+                  <a class="dropdown-item" href="#">What is PCA</a>
+                  <a class="dropdown-item" href="#">About PCA</a>
+                  <a class="dropdown-item" href="#">PCA Organization</a>
+                  <a class="dropdown-item" href="#">History</a>
+                  <a class="dropdown-item" href="#">Bylaws</a>
+                  <a class="dropdown-item" href="#">Rules and Regulations</a>
+                </div>
               </li>
-              <li class="nav-item">
-                <a class="nav-link{% if page == 'national_ranking' %} active{% endif %}" href="{% url 'web:national_rankings' %}">National Ranking</a>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="learnDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  About
+                </a>
+                <div class="dropdown-menu" aria-labelledby="learnDropdown">
+                  <a class="dropdown-item" href="#">Beginner's Guide</a>
+                  <a class="dropdown-item" href="#">Links</a>
+                  <a class="dropdown-item" href="#">Articles</a>
+                  <a class="dropdown-item" href="#">FAQs</a>
+                </div>
               </li>
-              <li class="nav-item">
-                <a class="nav-link{% if page == 'regional_ranking' %} active{% endif %}" href="{% url 'web:regional_rankings' %}">Regional Ranking</a>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="competeDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Compete
+                </a>
+                <div class="dropdown-menu" aria-labelledby="competeDropdown">
+                  <a class="dropdown-item" href="#">About WCA Competitions</a>
+                  <a class="dropdown-item" href="{% url 'web:national_rankings' %}">National Rankings</a>
+                  <a class="dropdown-item" href="{% url 'web:regional_rankings' %}">Regional Rankings</a>
+                  <a class="dropdown-item" href="{% url 'web:competitions' %}">List of Competitions</a>
+                  <a class="dropdown-item" href="#">WCA Rules and Regulations</a>
+                  <a class="dropdown-item" href="#">How to Organize a Competition</a>
+                </div>
               </li>
-              <li class="nav-item">
-                <a class="nav-link{% if page == 'blog' %} active{% endif %}" href="{% slugurl 'blog_page_index' %}">Blog</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link{% if page == 'contact' %} active{% endif %}" href="{% url 'web:index' %}">Contact Us</a>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="meetDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Meet
+                </a>
+                <div class="dropdown-menu" aria-labelledby="competeDropdown">
+                  <a class="dropdown-item" href="#">Cubemeets</a>
+                  <a class="dropdown-item" href="#">Organize a Cubemeet</a>
+                  <a class="dropdown-item" href="#">Events</a>
+                  <a class="dropdown-item" href="#">Marketplace</a>
+                  <a class="dropdown-item" href="#">Sponsoring Stores</a>
+                </div>
               </li>
             </ul>
             <ul class="navbar-nav mr-right">
