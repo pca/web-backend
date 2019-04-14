@@ -12,6 +12,20 @@ from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
 
+class HomePage(Page):
+    banner_text = RichTextField()
+
+    content_panels = Page.content_panels + [
+        FieldPanel('banner_text', classname="full"),
+    ]
+
+    @classmethod
+    def can_create_at(cls, parent):
+        # You can only create one of these!
+        return super().can_create_at(parent) \
+            and not cls.objects.exists()
+
+
 class BlogIndexPage(Page):
     subpage_types = ['pages.BlogPage']
 
