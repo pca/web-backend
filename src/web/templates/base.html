@@ -137,31 +137,31 @@
           <div class="collapse navbar-collapse" id="pcaNavbar" style="z-index: 1">
             <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
               <li class="nav-item">
-                <a class="nav-link{% if page == 'index' %} active{% endif %}" href="{% url 'web:index' %}">Home</a>
+                <a class="nav-link" href="{% url 'web:index' %}">Home</a>
               </li>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="aboutDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   About
                 </a>
                 <div class="dropdown-menu" aria-labelledby="aboutDropdown">
-                  <a class="dropdown-item" href="#">About - Summary</a>
-                  <a class="dropdown-item" href="#">What is PCA</a>
-                  <a class="dropdown-item" href="#">About PCA</a>
-                  <a class="dropdown-item" href="#">PCA Organization</a>
-                  <a class="dropdown-item" href="#">History</a>
-                  <a class="dropdown-item" href="#">Bylaws</a>
-                  <a class="dropdown-item" href="#">Rules and Regulations</a>
+                  <a class="dropdown-item" href="{% url 'web:summary' %}">About - Summary</a>
+                  <a class="dropdown-item" href="{% url 'web:pca' %}">What is PCA</a>
+                  <a class="dropdown-item" href="{% url 'web:wca' %}">About WCA</a>
+                  <a class="dropdown-item" href="{% url 'web:pca_organization' %}">PCA Organization</a>
+                  <a class="dropdown-item" href="{% url 'web:history' %}">History</a>
+                  <a class="dropdown-item" href="{% url 'web:bylaws' %}">Bylaws</a>
+                  <a class="dropdown-item" href="{% url 'web:rules_and_reg' %}">Rules and Regulations</a>
                 </div>
               </li>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="learnDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  About
+                  Learn
                 </a>
                 <div class="dropdown-menu" aria-labelledby="learnDropdown">
-                  <a class="dropdown-item" href="#">Beginner's Guide</a>
-                  <a class="dropdown-item" href="#">Links</a>
-                  <a class="dropdown-item" href="#">Articles</a>
-                  <a class="dropdown-item" href="#">FAQs</a>
+                  <a class="dropdown-item" href="{% url 'web:beginners_guide' %}">Beginner's Guide</a>
+                  <a class="dropdown-item" href="{% url 'web:links' %}">Links</a>
+                  <a class="dropdown-item" href="{% url 'web:articles' %}">Articles</a>
+                  <a class="dropdown-item" href="{% url 'web:faqs' %}">FAQs</a>
                 </div>
               </li>
               <li class="nav-item dropdown">
@@ -169,12 +169,12 @@
                   Compete
                 </a>
                 <div class="dropdown-menu" aria-labelledby="competeDropdown">
-                  <a class="dropdown-item" href="#">About WCA Competitions</a>
+                  <a class="dropdown-item" href="{% url 'web:about_wca_competitions' %}">About WCA Competitions</a>
                   <a class="dropdown-item" href="{% url 'web:national_rankings' %}">National Rankings</a>
                   <a class="dropdown-item" href="{% url 'web:regional_rankings' %}">Regional Rankings</a>
                   <a class="dropdown-item" href="{% url 'web:competitions' %}">List of Competitions</a>
-                  <a class="dropdown-item" href="#">WCA Rules and Regulations</a>
-                  <a class="dropdown-item" href="#">How to Organize a Competition</a>
+                  <a class="dropdown-item" href="{% url 'web:wca_rules_and_reg' %}">WCA Rules and Regulations</a>
+                  <a class="dropdown-item" href="{% url 'web:organize_a_competition' %}">How to Organize a Competition</a>
                 </div>
               </li>
               <li class="nav-item dropdown">
@@ -182,11 +182,11 @@
                   Meet
                 </a>
                 <div class="dropdown-menu" aria-labelledby="competeDropdown">
-                  <a class="dropdown-item" href="#">Cubemeets</a>
-                  <a class="dropdown-item" href="#">Organize a Cubemeet</a>
-                  <a class="dropdown-item" href="#">Events</a>
-                  <a class="dropdown-item" href="#">Marketplace</a>
-                  <a class="dropdown-item" href="#">Sponsoring Stores</a>
+                  <a class="dropdown-item" href="{% url 'web:cubemeets' %}">Cubemeets</a>
+                  <a class="dropdown-item" href="{% url 'web:organize_a_cubemeet' %}">Organize a Cubemeet</a>
+                  <a class="dropdown-item" href="{% url 'web:events' %}">Events</a>
+                  <a class="dropdown-item" href="{% url 'web:marketplace' %}">Marketplace</a>
+                  <a class="dropdown-item" href="{% url 'web:sponsoring_stores' %}">Sponsoring Stores</a>
                 </div>
               </li>
             </ul>

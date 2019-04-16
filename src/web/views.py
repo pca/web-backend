@@ -43,19 +43,10 @@ class ContentMixin:
         return context
 
 
-class UserLoginView(RedirectView):
-    """
-    Redirects the user to the WCA login page.
-    """
-    def get_redirect_url(self, *args, **kwargs):
-        return wca_client.authorize_uri()
-
-
-class UserLogoutView(LogoutView):
-    next_page = 'web:index'
-
-
 class IndexView(ContentMixin, TemplateView):
+    """
+    Homepage
+    """
     template_name = 'pages/index.html'
     page = 'index'
 
@@ -69,6 +60,164 @@ class IndexView(ContentMixin, TemplateView):
 
         context['upcoming_competition'] = upcoming_competition
         return context
+
+
+# About pages
+
+class SummaryView(TemplateView):
+    template_name = 'about/summary.html'
+
+
+class PCAView(TemplateView):
+    template_name = 'about/pca.html'
+
+
+class WCAView(TemplateView):
+    template_name = 'about/wca.html'
+
+
+class PCAOrganizationView(TemplateView):
+    template_name = 'about/pca_organization.html'
+
+
+class HistoryView(TemplateView):
+    template_name = 'about/history.html'
+
+
+class BylawsView(TemplateView):
+    template_name = 'about/bylaws.html'
+
+
+class RulesAndRegView(TemplateView):
+    template_name = 'about/rules_and_reg.html'
+
+
+# Learn pages
+
+class BeginnersGuideView(TemplateView):
+    template_name = 'learn/beginners_guide.html'
+
+
+class LinksView(TemplateView):
+    template_name = 'learn/links.html'
+
+
+class ArticlesView(TemplateView):
+    template_name = 'learn/articles.html'
+
+
+class FAQsView(TemplateView):
+    template_name = 'learn/faqs.html'
+
+
+# Compete pages
+
+class AboutWCACompetitionsView(TemplateView):
+    template_name = 'compete/about_wca_competitions.html'
+
+
+class NationalRankingsView(ContentMixin, TemplateView):
+    template_name = 'compete/rankings/national.html'
+    page = 'rankings_national'
+
+    def get_context_data(self, **kwargs):
+        context = super(NationalRankingsView, self).get_context_data(**kwargs)
+        context['all_rankings'] = wca_client.all_rankings('national')
+        return context
+
+
+class RegionalRankingsView(ContentMixin, TemplateView):
+    template_name = 'compete/rankings/regional.html'
+    page = 'rankings_regional'
+
+    def get_context_data(self, **kwargs):
+        region_key = self.request.GET.get('region', NCR)
+        region = LOCATION_DIRECTORY.get(region_key)
+
+        # Validate region
+        if not region:
+            raise Http404
+
+        context = super(RegionalRankingsView, self).get_context_data(**kwargs)
+        context['region'] = {
+            'key': region_key,
+            'label': region['label'],
+        }
+        context['region_choices'] = REGION_CHOICES
+        context['all_rankings'] = wca_client.all_rankings('regional', query=region_key)
+        return context
+
+
+class CityProvincialRankingsView(ContentMixin, TemplateView):
+    template_name = 'compete/rankings/city_provincial.html'
+    page = 'rankings_cityprovincial'
+
+    def get_context_data(self, **kwargs):
+        cityprovince = self.request.GET.get('cityprovince', CITY_OF_MANILA)
+
+        if cityprovince not in CITIES_PROVINCES:
+            raise Http404
+
+        context = super(CityProvincialRankingsView, self).get_context_data(**kwargs)
+        context['cityprovince'] = cityprovince
+        context['cityprovince_choices'] = CITIES_PROVINCES
+        context['all_rankings'] = wca_client.all_rankings('cityprovincial', query=cityprovince)
+        return context
+
+
+class CompetitionsView(ContentMixin, TemplateView):
+    template_name = 'compete/competitions.html'
+    page = 'competitions'
+
+    def get_context_data(self, **kwargs):
+        context = super(CompetitionsView, self).get_context_data(**kwargs)
+        upcoming_competitions = wca_client.upcoming_competitions()
+        context['upcoming_competitions'] = upcoming_competitions
+        return context
+
+
+class WCARulesAndRegView(TemplateView):
+    template_name = 'compete/wca_rules_and_regulations.html'
+
+
+class OrganizeACompetitionView(TemplateView):
+    template_name = 'compete/organiza_a_competition.html'
+
+
+# Meet pages
+
+class CubemeetsView(TemplateView):
+    template_name = 'meet/cubemeets.html'
+
+
+class OrganizeACubemeetView(TemplateView):
+    template_name = 'meet/organize_a_cubemeet.html'
+
+
+class EventsView(TemplateView):
+    template_name = 'meet/events.html'
+
+
+class MarketplaceView(TemplateView):
+    template_name = 'meet/marketplace.html'
+
+
+class SponsoringStoresView(TemplateView):
+    template_name = 'meet/sponsoring_stores.html'
+
+
+# User profile pages
+
+class UserLoginView(RedirectView):
+    """
+    Redirects the user to the WCA login page.
+    """
+    def get_redirect_url(self, *args, **kwargs):
+        return wca_client.authorize_uri()
+
+
+class UserLogoutView(LogoutView):
+    next_page = 'web:index'
 
 
 class ProfileView(AuthenticateMixin, ContentMixin, TemplateView):
@@ -109,66 +258,6 @@ class ProfileView(AuthenticateMixin, ContentMixin, TemplateView):
         context = super(ProfileView, self).get_context_data(**kwargs)
         context['form'] = PCAProfileForm(instance=self.request.user.pcaprofile)
         context['location_directory'] = LOCATION_DIRECTORY
-        return context
-
-
-class CompetitionsView(ContentMixin, TemplateView):
-    template_name = 'pages/competitions.html'
-    page = 'competitions'
-
-    def get_context_data(self, **kwargs):
-        context = super(CompetitionsView, self).get_context_data(**kwargs)
-        upcoming_competitions = wca_client.upcoming_competitions()
-        context['upcoming_competitions'] = upcoming_competitions
-        return context
-
-
-class NationalRankingsView(ContentMixin, TemplateView):
-    template_name = 'pages/rankings/national.html'
-    page = 'rankings_national'
-
-    def get_context_data(self, **kwargs):
-        context = super(NationalRankingsView, self).get_context_data(**kwargs)
-        context['all_rankings'] = wca_client.all_rankings('national')
-        return context
-
-
-class RegionalRankingsView(ContentMixin, TemplateView):
-    template_name = 'pages/rankings/regional.html'
-    page = 'rankings_regional'
-
-    def get_context_data(self, **kwargs):
-        region_key = self.request.GET.get('region', NCR)
-        region = LOCATION_DIRECTORY.get(region_key)
-
-        # Validate region
-        if not region:
-            raise Http404
-
-        context = super(RegionalRankingsView, self).get_context_data(**kwargs)
-        context['region'] = {
-            'key': region_key,
-            'label': region['label'],
-        }
-        context['region_choices'] = REGION_CHOICES
-        context['all_rankings'] = wca_client.all_rankings('regional', query=region_key)
-        return context
-
-
-class CityProvincialRankingsView(ContentMixin, TemplateView):
-    template_name = 'pages/rankings/city_provincial.html'
-    page = 'rankings_cityprovincial'
-
-    def get_context_data(self, **kwargs):
-        cityprovince = self.request.GET.get('cityprovince', CITY_OF_MANILA)
-
-        if cityprovince not in CITIES_PROVINCES:
-            raise Http404
-
-        context = super(CityProvincialRankingsView, self).get_context_data(**kwargs)
-        context['cityprovince'] = cityprovince
-        context['cityprovince_choices'] = CITIES_PROVINCES
-        context['all_rankings'] = wca_client.all_rankings('cityprovincial', query=cityprovince)
         return context
 
 
