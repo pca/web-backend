@@ -1,0 +1,27 @@
+version: '3.5'
+
+volumes:
+  pg-volume:
+    name: pca-api-pg
+
+services:
+  pca-api:
+    build: .
+    image: pca-api
+    container_name: pca-api
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/app/
+
+  postgres:
+    image: postgres:12.5-alpine
+    container_name: pca-api-pg
+    environment:
+      - POSTGRES_USER=pca
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=pca_api
+    ports:
+      - 5432:5432
+    volumes:
+      - pg-volume:/var/lib/postgresql/data/
