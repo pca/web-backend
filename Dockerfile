@@ -1,8 +1,15 @@
-FROM python:3.6-alpine
+FROM python:3.8-slim-buster
 
-RUN apk update
-RUN apk add mysql-client curl git
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
 
-WORKDIR /app/src
-ADD requirements.txt /app/src
-RUN pip install -r requirements.txt
+RUN apt-get update && apt-get install -y curl unzip
+
+WORKDIR /app
+
+COPY ./requirements.txt /requirements.txt
+RUN pip install -r /requirements.txt
+
+COPY ./docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]

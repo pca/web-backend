@@ -1,0 +1,33 @@
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.utils.translation import gettext_lazy as _
+
+from .models import User, RegionUpdateRequest
+
+UserAdmin.fieldsets = (
+    (None, {"fields": ("username", "password")}),
+    (
+        _("Personal info"),
+        {"fields": ("first_name", "last_name", "email", "region", "wca_id")},
+    ),
+    (
+        _("Permissions"),
+        {
+            "fields": (
+                "is_active",
+                "is_staff",
+                "is_superuser",
+                "groups",
+                "user_permissions",
+            ),
+        },
+    ),
+    (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+)
+
+admin.site.register(User, UserAdmin)
+
+
+@admin.register(RegionUpdateRequest)
+class RegionUpdateRequestAdmin(admin.ModelAdmin):
+    list_display = ("user", "region", "status", "created_at")
