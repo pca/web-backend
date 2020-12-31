@@ -2,9 +2,6 @@ Philippine Cubers Association
 ===
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![Build Status](https://travis-ci.org/pca/web-backend.svg?branch=master)](https://travis-ci.org/pca/web-backend)
-[![Maintainability](https://api.codeclimate.com/v1/badges/7a8887688397d1cbcd06/maintainability)](https://codeclimate.com/github/pca/web-backend/maintainability)
-[![Coverage Status](https://img.shields.io/coveralls/github/pca/web-backend/master.svg)](https://coveralls.io/github/pca/web-backend?branch=master)
 
 This is the new PCA web repo written in python. Live test server: [https://www.pinoycubers.org/](https://www.pinoycubers.org/)
 
@@ -14,7 +11,6 @@ This is the new PCA web repo written in python. Live test server: [https://www.p
 2. **Compititions** - Updated list of upcoming competitions
 3. **National Rankings** - View the national rankings
 4. **Regional Rankings (Unofficial)** - View the regional rankings
-5. **City/Provincial Rankings (Unofficial)** - View the city/provincial rankings
 
 ## WCA Data
 
@@ -30,31 +26,37 @@ No official record has been tampered/modified.
 
 ### Development Setup
 
-1. Build and run the containers.
+1. Make a `.env` file from `.env.example`
 
     ```
-    $ docker-compose -f compose/development.yml build
-    $ docker-compose -f compose/development.yml up -d
+    $ cp .env.example .env
+    ```
+
+2. Build and run the containers.
+
+    ```
+    $ docker-compose build
+    $ docker-compose up -d
     ```
 
 ### Database Setup
 
-1. Run migrations for the default database.
+1. Run database migrations.
 
     ```
-    $ docker-compose -f compose/development.yml exec api python manage.py migrate
+    $ docker-compose exec pca-api python manage.py migrate
     ```
 
-2. Load database_config fixtures (contains the default config for the WCA databases).
+2. Import WCA database.
 
     ```
-    $ docker-compose -f compose/development.yml exec api python manage.py loaddata database_config
+    $ docker-compose exec pca-api sh /app/sync_wca_database.sh
     ```
 
-3. Import WCA database.
+3. Create a superuser.
 
     ```
-    $ docker-compose -f compose/staging.yml exec api sh /app/scripts/sync_wca_database
+    $ docker-compose exec pca-api python manage.py createsuperuser
     ```
 
 ## Developers
