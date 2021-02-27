@@ -15,6 +15,7 @@ ENV_FILE = os.path.join(BASE_DIR, ".env")
 env = environ.Env(
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, ["*"]),
+    CORS_ALLOWED_ORIGINS=(list, []),
 )
 env.read_env(ENV_FILE)
 
@@ -54,6 +55,7 @@ THIRD_PARTY_APPS = [
     "rest_auth",
     "rest_auth.registration",
     "drf_spectacular",
+    "corsheaders",
 ]
 
 LOCAL_APPS = [
@@ -66,7 +68,9 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 SITE_ID = 1
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -142,6 +146,10 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 
 # Auth
 
@@ -184,3 +192,9 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": False,
 }
+
+
+# Django CORS Header
+# https://github.com/adamchainz/django-cors-headers
+
+CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
