@@ -33,7 +33,14 @@ WCA_PROVIDER = "worldcubeassociation"
 
 
 class WCALoginView(SocialLoginView):
-    """ Login with WCA code. access_token is not required. """
+    """ Login with WCA code. access_token is not required.
+
+    WCA Login flow
+
+    1. Redirect users to https://www.worldcubeassociation.org/oauth/authorize/?client_id=<wca_app_id>&redirect_uri=<frontend_app_url>&response_type=code&scope=
+    2. After successful WCA login, users will be redirected to <frontend_app_url>?code=<user_auth_code>
+    3. Use <user_auth_code> in this API.
+    """
 
     adapter_class = WorldCubeAssociationOAuth2Adapter
     callback_url = app_settings.WCA_CALLBACK_URL
