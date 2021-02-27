@@ -76,6 +76,9 @@ class RegionUpdateRequest(LifecycleModel):
     status = models.CharField(
         max_length=8, choices=STATUS_CHOICES, default=STATUS_PENDING
     )
+    staff_notes = models.TextField(
+        blank=True, help_text="Only visible to staff and admins"
+    )
 
     created_at = models.DateTimeField(db_index=True, auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
