@@ -19,7 +19,7 @@ Ao5_EVENTS = [
 ]
 
 
-def parse_time(value):
+def parse_time(value, hide_ms=False):
     data = []
     time = timedelta(seconds=value)
     total_seconds = time.seconds
@@ -32,13 +32,17 @@ def parse_time(value):
         data.append(f"{minutes:d}")
     if seconds:
         if time.microseconds:
-            microseconds = f"{int(time.microseconds/10000):02}"
+            microseconds = f".{int(time.microseconds/10000):02}"
         else:
-            microseconds = "00"
+            microseconds = ".00"
+        if hide_ms:
+            microseconds = ""
         if minutes:
-            data.append(f"{seconds:02d}.{microseconds}")
+            data.append(f"{seconds:02d}{microseconds}")
         else:
-            data.append(f"{seconds:d}.{microseconds}")
+            data.append(f"{seconds:d}{microseconds}")
+    elif hide_ms:
+        data.append("00")
     elif time.microseconds:
         if minutes:
             data.append(f"00.{int(time.microseconds/10000)}")
@@ -77,9 +81,8 @@ def parse_value(value, format, rank_type="best"):
             total = solved + missed
 
             if seconds:
-                time = parse_time(seconds / 1)
-
-            return f"{time}; {solved} solved, {missed} missed, {total} total"
+                time = parse_time(seconds / 1, hide_ms=True)
+                return f"{solved}/{total} {time}"
 
         # Old format
         if len(value) == 10 and value[0] == "1":
@@ -88,9 +91,8 @@ def parse_value(value, format, rank_type="best"):
             seconds = int(value[2:7]) if value[2:7] != "99999" else None
 
             if seconds:
-                time = parse_time(seconds / 100)
-
-            return f"{time}; {solved} solved, {total} total"
+                time = parse_time(seconds / 100, hide_ms=True)
+                return f"{solved}/{total} {time}"
 
 
 def parse_solves(result, rank_type):
