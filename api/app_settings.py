@@ -12,3 +12,6 @@ WCA_CALLBACK_URL = getattr(
 )
 FB_PAGE_TOKEN = getattr(settings, "FB_PAGE_TOKEN", os.getenv("FB_PAGE_TOKEN"))
 FB_PAGE_ID = getattr(settings, "FB_PAGE_ID", os.getenv("FB_PAGE_ID"))
+FB_PAGE_FEED_LIMIT = getattr(
+    settings, "FB_PAGE_FEED_LIMIT", os.getenv("FB_PAGE_FEED_LIMIT", 5)
+)

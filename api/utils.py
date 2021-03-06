@@ -12,6 +12,7 @@ def get_facebook_posts():
     fields = "full_picture,message,created_time,permalink_url,from"
     url = f"{FB_GRAPH_URL}/{app_settings.FB_PAGE_ID}/feed?fields={fields}"
     url += f"&access_token={app_settings.FB_PAGE_TOKEN}"
+    url += f"&limit={app_settings.FB_PAGE_FEED_LIMIT}"
     response = requests.get(url)
     if response.status_code != 200:
         log.debug(response.json())
