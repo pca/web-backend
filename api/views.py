@@ -111,7 +111,11 @@ class NationalRankingSingleAPIView(RankingBaseAPIView):
             .distinct("person_id")
             .values_list("id")
         )
-        results = Result.objects.filter(pk__in=result_ids).order_by("best")
+        results = (
+            Result.objects.filter(pk__in=result_ids)
+            .select_related("event", "person", "competition")
+            .order_by("best")
+        )
         return results[:limit]
 
 
@@ -127,7 +131,11 @@ class NationalRankingAverageAPIView(RankingBaseAPIView):
             .distinct("person_id")
             .values_list("id")
         )
-        results = Result.objects.filter(pk__in=result_ids).order_by("average")
+        results = (
+            Result.objects.filter(pk__in=result_ids)
+            .select_related("event", "person", "competition")
+            .order_by("average")
+        )
         return results[:limit]
 
 
@@ -152,7 +160,11 @@ class RegionalRankingSingleAPIView(RankingBaseAPIView):
             .distinct("person_id")
             .values_list("id")
         )
-        results = Result.objects.filter(pk__in=result_ids).order_by("best")
+        results = (
+            Result.objects.filter(pk__in=result_ids)
+            .select_related("event", "person", "competition")
+            .order_by("best")
+        )
         return results[:limit]
 
 
@@ -177,7 +189,11 @@ class RegionalRankingAverageAPIView(RankingBaseAPIView):
             .distinct("person_id")
             .values_list("id")
         )
-        results = Result.objects.filter(pk__in=result_ids).order_by("average")
+        results = (
+            Result.objects.filter(pk__in=result_ids)
+            .select_related("event", "person", "competition")
+            .order_by("average")
+        )
         return results[:limit]
 
 
