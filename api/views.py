@@ -76,6 +76,12 @@ class EventListAPIView(ListAPIView):
 
 class RankingBaseAPIView(ListAPIView):
     serializer_class = ResultSerializer
+    rank_type = None
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["rank_type"] = self.rank_type
+        return context
 
     def get_event(self):
         event_id = self.kwargs.get("event_id")
@@ -94,6 +100,8 @@ class RankingBaseAPIView(ListAPIView):
 
 
 class NationalRankingSingleAPIView(RankingBaseAPIView):
+    rank_type = "best"
+
     def get_queryset(self):
         event = self.get_event()
         limit = self.get_limit()
@@ -108,10 +116,7 @@ class NationalRankingSingleAPIView(RankingBaseAPIView):
 
 
 class NationalRankingAverageAPIView(RankingBaseAPIView):
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context["rank_type"] = "average"
-        return context
+    rank_type = "average"
 
     def get_queryset(self):
         event = self.get_event()
@@ -127,6 +132,8 @@ class NationalRankingAverageAPIView(RankingBaseAPIView):
 
 
 class RegionalRankingSingleAPIView(RankingBaseAPIView):
+    rank_type = "best"
+
     def get_queryset(self):
         region = self.kwargs.get("region_id")
         event = self.get_event()
@@ -150,10 +157,7 @@ class RegionalRankingSingleAPIView(RankingBaseAPIView):
 
 
 class RegionalRankingAverageAPIView(RankingBaseAPIView):
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context["rank_type"] = "average"
-        return context
+    rank_type = "average"
 
     def get_queryset(self):
         region = self.kwargs.get("region_id")
