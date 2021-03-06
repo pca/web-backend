@@ -41,3 +41,11 @@ class RegionUpdateRequestSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return obj.get_status_display()
+
+
+class NewsSerializer(serializers.Serializer):
+    from_name = serializers.CharField()
+    message = serializers.CharField()
+    image = serializers.URLField()
+    permalink = serializers.URLField()
+    created_at = serializers.DateTimeField()

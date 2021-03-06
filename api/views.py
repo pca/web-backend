@@ -20,11 +20,13 @@ from wca.serializers import EventSerializer, ResultSerializer
 from . import app_settings
 from .models import RegionUpdateRequest
 from .serializers import (
+    NewsSerializer,
     RegionSerializer,
+    RegionUpdateRequestSerializer,
     UserDetailSerializer,
     UserRegionUpdateSerializer,
-    RegionUpdateRequestSerializer,
 )
+from .utils import get_facebook_posts
 
 User = get_user_model()
 
@@ -241,3 +243,15 @@ class RegionUpdateRequestListCreateAPIView(ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class NewsListAPIView(APIView):
+    """ News Feed from Facebook Page """
+
+    serializer_class = NewsSerializer
+
+    def get(self, request, *args, **kwargs):
+        posts = get_facebook_posts()
+        serializer = NewsSerializer(data=posts, many=True)
+        serializer.is_valid()
+        return Response(serializer.data)
