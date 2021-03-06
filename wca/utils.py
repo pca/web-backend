@@ -59,10 +59,11 @@ def parse_value(value, format, rank_type="best"):
     if format == "time":
         return parse_time(value / 100)
 
-    if format == "number" and rank_type == "average":
-        return f"{value/100}"
-    else:
-        return f"{value}"
+    if format == "number":
+        if rank_type == "average":
+            return f"{value/100}"
+        else:
+            return f"{value}"
 
     if format == "multi":
         value = str(value)
