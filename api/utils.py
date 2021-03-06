@@ -1,7 +1,10 @@
+import logging
+
 import requests
 
 from . import app_settings
 
+log = logging.getLogger(__name__)
 FB_GRAPH_URL = "https://graph.facebook.com/v10.0"
 
 
@@ -11,6 +14,7 @@ def get_facebook_posts():
     url += f"&access_token={app_settings.FB_PAGE_TOKEN}"
     response = requests.get(url)
     if response.status_code != 200:
+        log.debug(response.json())
         return []
     resp_data = response.json()
     posts = []

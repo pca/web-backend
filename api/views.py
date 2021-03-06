@@ -1,6 +1,8 @@
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_auth.registration.views import SocialLoginView
 from rest_framework import exceptions
 from rest_framework.generics import (
@@ -250,6 +252,7 @@ class NewsListAPIView(APIView):
 
     serializer_class = NewsSerializer
 
+    @method_decorator(cache_page(60 * 10))
     def get(self, request, *args, **kwargs):
         posts = get_facebook_posts()
         serializer = NewsSerializer(data=posts, many=True)

@@ -5,6 +5,7 @@ django-cors-headers==3.7.0
 django-environ==0.4.5
 django-extensions==3.1.0
 django-lifecycle==0.8.0
+django-redis==4.12.1
 django-rest-auth==0.9.5
 djangorestframework==3.12.2
 drf-spectacular==0.12.0

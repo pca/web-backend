@@ -3,6 +3,8 @@ version: '3.5'
 volumes:
   pg-volume:
     name: pca-api-pg
+  redis-volume:
+    name: pca-api-redis
 
 services:
   pca-api:
@@ -25,3 +27,10 @@ services:
       - 5432:5432
     volumes:
       - pg-volume:/var/lib/postgresql/data/
+
+  redis:
+    image: redis:5.0
+    container_name: pca-api-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-volume:/data/
