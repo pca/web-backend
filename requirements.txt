@@ -1,4 +1,4 @@
-Django==3.1.4
+Django==3.1.6
 django-admin-interface==0.15.3
 django-allauth==0.44.0
 django-cors-headers==3.7.0
