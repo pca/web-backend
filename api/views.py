@@ -230,8 +230,12 @@ class UserRegionUpdateAPIView(UpdateAPIView):
 
 class RegionUpdateRequestListCreateAPIView(ListCreateAPIView):
     serializer_class = RegionUpdateRequestSerializer
-    queryset = RegionUpdateRequest.objects.order_by("-created_at")
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return RegionUpdateRequest.objects.filter(user=self.request.user).order_by(
+            "-created_at"
+        )
 
     def create(self, request, *args, **kwargs):
         last_request = request.user.region_update_requests.order_by(
