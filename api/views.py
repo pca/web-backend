@@ -75,7 +75,7 @@ class RegionListAPIView(APIView):
 
 class EventListAPIView(ListAPIView):
     serializer_class = EventSerializer
-    queryset = Event.objects.all()
+    queryset = Event.objects.order_by("rank")
 
 
 class RankingBaseAPIView(ListAPIView):
