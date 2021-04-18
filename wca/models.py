@@ -53,6 +53,13 @@ class PersonQuerySet(models.QuerySet):
 
 
 class Person(models.Model):
+    GENDER_MALE = "m"
+    GENDER_FEMALE = "f"
+    GENDER_CHOICES = (
+        (GENDER_MALE, "Male"),
+        (GENDER_FEMALE, "Female"),
+    )
+
     id = models.CharField(primary_key=True, max_length=10)
     subid = models.IntegerField()
     name = models.CharField(max_length=80, blank=True, null=True)
@@ -62,7 +69,9 @@ class Person(models.Model):
         null=True,
         on_delete=models.DO_NOTHING,
     )
-    gender = models.CharField(max_length=1, blank=True, null=True)
+    gender = models.CharField(
+        max_length=1, choices=GENDER_CHOICES, blank=True, null=True
+    )
 
     objects = BaseManager.from_queryset(PersonQuerySet)()
 
