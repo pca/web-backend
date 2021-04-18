@@ -190,6 +190,7 @@ def import_ranks_average():
         RanksAverage.objects.create(
             person_id=row.personId,
             event_id=row.eventId,
+            best=row.best,
             world_rank=row.worldRank,
             continent_rank=row.continentRank,
             country_rank=row.countryRank,
@@ -211,6 +212,7 @@ def import_ranks_single():
         RanksSingle.objects.create(
             person_id=row.personId,
             event_id=row.eventId,
+            best=row.best,
             world_rank=row.worldRank,
             continent_rank=row.continentRank,
             country_rank=row.countryRank,
