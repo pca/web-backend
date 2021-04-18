@@ -58,6 +58,11 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        if self.wca_id:
+            return f"{self.wca_id} - {self.get_full_name()}"
+        return self.get_full_name()
+
 
 class RegionUpdateRequest(LifecycleModel):
     STATUS_PENDING = "p"
@@ -82,6 +87,9 @@ class RegionUpdateRequest(LifecycleModel):
 
     created_at = models.DateTimeField(db_index=True, auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.get_region_display()}"
 
     @hook(AFTER_UPDATE, when="status", was=STATUS_PENDING, is_now=STATUS_APPROVED)
     def on_approve(self):

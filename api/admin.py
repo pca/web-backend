@@ -6,29 +6,36 @@ from django.utils.translation import gettext_lazy as _
 from .models import RegionUpdateRequest
 
 User = get_user_model()
+admin.site.site_url = None
 
-UserAdmin.fieldsets = (
-    (None, {"fields": ("username", "password")}),
-    (
-        _("Personal info"),
-        {"fields": ("first_name", "last_name", "email", "region", "wca_id")},
-    ),
-    (
-        _("Permissions"),
-        {
-            "fields": (
-                "is_active",
-                "is_staff",
-                "is_superuser",
-                "groups",
-                "user_permissions",
-            ),
-        },
-    ),
-    (_("Important dates"), {"fields": ("last_login", "date_joined")}),
-)
 
-admin.site.register(User, UserAdmin)
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    fieldsets = (
+        (None, {"fields": ("username", "password")}),
+        (
+            _("Personal info"),
+            {"fields": ("first_name", "last_name", "email", "region", "wca_id")},
+        ),
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                ),
+            },
+        ),
+        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+    )
+    list_display = ("wca_id_or_username", "first_name", "last_name", "is_staff")
+
+    @admin.display(description="WCA ID / Username")
+    def wca_id_or_username(self, obj):
+        return obj.wca_id or obj.username
 
 
 @admin.register(RegionUpdateRequest)
@@ -41,6 +48,7 @@ class RegionUpdateRequestAdmin(admin.ModelAdmin):
         "status",
         "created_at",
     )
+    list_editable = ("status",)
     list_filter = ("status",)
     readonly_fields = ("user",)
 
