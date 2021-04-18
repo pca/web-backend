@@ -31,5 +31,6 @@ urlpatterns = [
         "rankings/regional-average/<str:region_id>/<str:event_id>/",
         views.RegionalRankingAverageAPIView.as_view(),
     ),
+    path("persons/<str:wca_id>/", views.PersonRetrieveAPIView.as_view()),
     path("news/", views.NewsListAPIView.as_view()),
 ]

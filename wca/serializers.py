@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from . import models
+from . import api, models
 from .utils import parse_solves, parse_value
 
 
@@ -39,3 +39,49 @@ class ResultSerializer(serializers.ModelSerializer):
     def get_solves(self, obj):
         rank_type = self.context.get("rank_type")
         return parse_solves(obj, rank_type)
+
+
+class PersonSerializer(serializers.ModelSerializer):
+    gender = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
+    competition_count = serializers.SerializerMethodField()
+    solve_count = serializers.SerializerMethodField()
+    personal_records = serializers.SerializerMethodField()
+    records = serializers.SerializerMethodField()
+    medals = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Person
+        fields = (
+            "id",
+            "name",
+            "country",
+            "gender",
+            "avatar",
+            "competition_count",
+            "solve_count",
+            "personal_records",
+            "records",
+            "medals",
+        )
+
+    def get_gender(self, obj):
+        return obj.get_gender_display()
+
+    def get_avatar(self, obj):
+        return api.get_avatar(obj)
+
+    def get_competition_count(self, obj):
+        return api.get_competition_count(obj)
+
+    def get_solve_count(self, obj):
+        return api.get_solve_count(obj)
+
+    def get_personal_records(self, obj):
+        return api.get_personal_records(obj)
+
+    def get_records(self, obj):
+        return api.get_records(obj)
+
+    def get_medals(self, obj):
+        return api.get_medals(obj)

@@ -16,8 +16,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from wca_allauth.views import WorldCubeAssociationOAuth2Adapter
 
-from wca.models import Event, Result
-from wca.serializers import EventSerializer, ResultSerializer
+from wca.models import Event, Person, Result
+from wca.serializers import EventSerializer, PersonSerializer, ResultSerializer
 
 from . import app_settings
 from .models import RegionUpdateRequest
@@ -249,6 +249,14 @@ class RegionUpdateRequestListCreateAPIView(ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class PersonRetrieveAPIView(RetrieveAPIView):
+    serializer_class = PersonSerializer
+
+    def get_object(self):
+        wca_id = self.kwargs.get("wca_id")
+        return Person.objects.get(id=wca_id)
 
 
 class NewsListAPIView(APIView):
