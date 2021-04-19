@@ -44,11 +44,7 @@ class ResultSerializer(serializers.ModelSerializer):
 class PersonSerializer(serializers.ModelSerializer):
     gender = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
-    competition_count = serializers.SerializerMethodField()
-    solve_count = serializers.SerializerMethodField()
-    personal_records = serializers.SerializerMethodField()
-    records = serializers.SerializerMethodField()
-    medals = serializers.SerializerMethodField()
+    career = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Person
@@ -58,11 +54,7 @@ class PersonSerializer(serializers.ModelSerializer):
             "country",
             "gender",
             "avatar",
-            "competition_count",
-            "solve_count",
-            "personal_records",
-            "records",
-            "medals",
+            "career",
         )
 
     def get_gender(self, obj):
@@ -71,17 +63,5 @@ class PersonSerializer(serializers.ModelSerializer):
     def get_avatar(self, obj):
         return api.get_avatar(obj)
 
-    def get_competition_count(self, obj):
-        return api.get_competition_count(obj)
-
-    def get_solve_count(self, obj):
-        return api.get_solve_count(obj)
-
-    def get_personal_records(self, obj):
-        return api.get_personal_records(obj)
-
-    def get_records(self, obj):
-        return api.get_records(obj)
-
-    def get_medals(self, obj):
-        return api.get_medals(obj)
+    def get_career(self, obj):
+        return api.get_career_details(obj)
