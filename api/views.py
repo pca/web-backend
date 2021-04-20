@@ -27,6 +27,7 @@ from .serializers import (
     RegionUpdateRequestSerializer,
     UserDetailSerializer,
     UserRegionUpdateSerializer,
+    ZoneSerializer,
 )
 from .utils import get_facebook_posts
 
@@ -69,8 +70,17 @@ class RegionListAPIView(APIView):
     serializer_class = RegionSerializer
 
     def get(self, request, *args, **kwargs):
-        regions = [dict(id=id, name=name) for id, name in User.REGION_CHOICES]
+        regions = [{"id": r_id, "name": name} for r_id, name in User.REGION_CHOICES]
         return Response(regions)
+
+
+class ZoneListAPIView(APIView):
+    serializer_class = ZoneSerializer
+
+    @extend_schema(tags=["locations"])
+    def get(self, request, *args, **kwargs):
+        zones = [{"id": zone_id, "name": name} for zone_id, name in User.ZONE_CHOICES]
+        return Response(zones)
 
 
 class EventListAPIView(ListAPIView):
@@ -139,6 +149,79 @@ class NationalRankingAverageAPIView(RankingBaseAPIView):
             Result.objects.filter(pk__in=result_ids)
             .select_related("event", "person", "competition")
             .order_by("average")
+        )
+        return results[:limit]
+
+
+class ZonalRankingBaseAPIView(RankingBaseAPIView):
+    def get_zone(self):
+        valid_zones = [zone_id for zone_id, _ in User.ZONE_CHOICES]
+        zone = self.kwargs.get("zone_id")
+        if zone not in valid_zones:
+            raise exceptions.ParseError(
+                f"Invalid zone. Valid zones are: {', '.join(valid_zones)}"
+            )
+        return zone
+
+    def get_wca_ids(self):
+        zone = self.get_zone()
+        zone_regions = User.ZONE_REGIONS.get(zone)
+        wca_ids = User.objects.filter(
+            region__in=zone_regions,
+            socialaccount__provider=WCA_PROVIDER,
+            wca_id__isnull=False,
+        ).values_list("wca_id")
+        return wca_ids
+
+
+class ZonalRankingSingleAPIView(ZonalRankingBaseAPIView):
+    rank_type = "best"
+
+    def get_queryset(self):
+        event = self.get_event()
+        limit = self.get_limit()
+        wca_ids = self.get_wca_ids()
+        result_ids = (
+            Result.objects.filter(
+                country_id=PH_COUNTRY_ID,
+                event=event,
+                best__gt=0,
+                person_id__in=wca_ids,
+            )
+            .order_by("person_id", "best")
+            .distinct("person_id")
+            .values_list("id")
+        )
+        results = (
+            Result.objects.filter(pk__in=result_ids)
+            .select_related("event", "person", "competition")
+            .order_by("best")
+        )
+        return results[:limit]
+
+
+class ZonalRankingAverageAPIView(ZonalRankingBaseAPIView):
+    rank_type = "average"
+
+    def get_queryset(self):
+        event = self.get_event()
+        limit = self.get_limit()
+        wca_ids = self.get_wca_ids()
+        result_ids = (
+            Result.objects.filter(
+                country_id=PH_COUNTRY_ID,
+                event=event,
+                average__gt=0,
+                person_id__in=wca_ids,
+            )
+            .order_by("person_id", "best")
+            .distinct("person_id")
+            .values_list("id")
+        )
+        results = (
+            Result.objects.filter(pk__in=result_ids)
+            .select_related("event", "person", "competition")
+            .order_by("best")
         )
         return results[:limit]
 

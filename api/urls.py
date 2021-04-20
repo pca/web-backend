@@ -15,6 +15,7 @@ urlpatterns = [
     ),
     path("regions/", views.RegionListAPIView.as_view()),
     path("events/", views.EventListAPIView.as_view()),
+    path("zones/", views.ZoneListAPIView.as_view()),
     path(
         "rankings/national-single/<str:event_id>/",
         views.NationalRankingSingleAPIView.as_view(),
@@ -30,6 +31,14 @@ urlpatterns = [
     path(
         "rankings/regional-average/<str:region_id>/<str:event_id>/",
         views.RegionalRankingAverageAPIView.as_view(),
+    ),
+    path(
+        "rankings/zonal-single/<str:zone_id>/<str:event_id>",
+        views.ZonalRankingSingleAPIView.as_view(),
+    ),
+    path(
+        "rankings/zonal-average/<str:zone_id>/<str:event_id>",
+        views.ZonalRankingAverageAPIView.as_view(),
     ),
     path("persons/<str:wca_id>/", views.PersonRetrieveAPIView.as_view()),
     path("news/", views.NewsListAPIView.as_view()),

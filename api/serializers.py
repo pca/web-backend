@@ -11,6 +11,11 @@ class RegionSerializer(serializers.Serializer):
     name = serializers.CharField()
 
 
+class ZoneSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    name = serializers.CharField()
+
+
 class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
