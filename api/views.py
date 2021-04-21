@@ -20,6 +20,7 @@ from wca.models import Event, Person, Result
 from wca.serializers import EventSerializer, PersonSerializer, ResultSerializer
 
 from . import app_settings
+from .filters import LimitFilter
 from .models import RegionUpdateRequest
 from .serializers import (
     NewsSerializer,
@@ -38,7 +39,7 @@ WCA_PROVIDER = "worldcubeassociation"
 
 
 class WCALoginView(SocialLoginView):
-    """ Login with WCA code. access_token is not required.
+    """Login with WCA code. access_token is not required.
 
     WCA Login flow
 
@@ -66,30 +67,36 @@ class UserRetrieveAPIView(RetrieveAPIView):
         return self.request.user
 
 
-class RegionListAPIView(APIView):
+class RegionListAPIView(ListAPIView):
+    """ List regions in the Philippines """
+
     serializer_class = RegionSerializer
 
-    def get(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         regions = [{"id": r_id, "name": name} for r_id, name in User.REGION_CHOICES]
         return Response(regions)
 
 
-class ZoneListAPIView(APIView):
+class ZoneListAPIView(ListAPIView):
+    """ List of region zones in the Philippines """
+
     serializer_class = ZoneSerializer
 
-    @extend_schema(tags=["locations"])
-    def get(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         zones = [{"id": zone_id, "name": name} for zone_id, name in User.ZONE_CHOICES]
         return Response(zones)
 
 
 class EventListAPIView(ListAPIView):
+    """ List of official WCA events """
+
     serializer_class = EventSerializer
     queryset = Event.objects.order_by("rank")
 
 
 class RankingBaseAPIView(ListAPIView):
     serializer_class = ResultSerializer
+    filter_backends = [LimitFilter]
     rank_type = None
 
     def get_serializer_context(self):
@@ -104,16 +111,10 @@ class RankingBaseAPIView(ListAPIView):
             raise exceptions.NotFound("Event not found.")
         return event
 
-    def get_limit(self):
-        limit = self.request.query_params.get("limit", 100)
-        try:
-            limit = int(limit)
-        except ValueError:
-            raise exceptions.ParseError("Invalid limit")
-        return limit
-
 
 class NationalRankingSingleAPIView(RankingBaseAPIView):
+    """ Official single national rankings """
+
     rank_type = "best"
 
     def get_queryset(self):
@@ -134,6 +135,8 @@ class NationalRankingSingleAPIView(RankingBaseAPIView):
 
 
 class NationalRankingAverageAPIView(RankingBaseAPIView):
+    """ Official average national rankings """
+
     rank_type = "average"
 
     def get_queryset(self):
@@ -175,6 +178,8 @@ class ZonalRankingBaseAPIView(RankingBaseAPIView):
 
 
 class ZonalRankingSingleAPIView(ZonalRankingBaseAPIView):
+    """ Unofficial single zonal rankings """
+
     rank_type = "best"
 
     def get_queryset(self):
@@ -201,6 +206,8 @@ class ZonalRankingSingleAPIView(ZonalRankingBaseAPIView):
 
 
 class ZonalRankingAverageAPIView(ZonalRankingBaseAPIView):
+    """ Unofficial average zonal rankings """
+
     rank_type = "average"
 
     def get_queryset(self):
@@ -227,6 +234,8 @@ class ZonalRankingAverageAPIView(ZonalRankingBaseAPIView):
 
 
 class RegionalRankingSingleAPIView(RankingBaseAPIView):
+    """ Unofficial single regional rankings """
+
     rank_type = "best"
 
     def get_queryset(self):
@@ -256,6 +265,8 @@ class RegionalRankingSingleAPIView(RankingBaseAPIView):
 
 
 class RegionalRankingAverageAPIView(RankingBaseAPIView):
+    """ Unofficial average regional rankings """
+
     rank_type = "average"
 
     def get_queryset(self):
@@ -335,6 +346,8 @@ class RegionUpdateRequestListCreateAPIView(ListCreateAPIView):
 
 
 class PersonRetrieveAPIView(RetrieveAPIView):
+    """ Retrieve WCA profile and statistics """
+
     serializer_class = PersonSerializer
 
     def get_object(self):

@@ -1,21 +1,34 @@
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
 from rest_framework import serializers
 
-from . import api, models
+from . import api, models, openapi
 from .utils import parse_solves, parse_value
 
 
+@extend_schema_serializer(examples=[openapi.event_example])
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Event
         fields = "__all__"
 
 
+@extend_schema_serializer(examples=[openapi.competition_example])
 class CompetitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Competition
         fields = ("id", "name")
 
 
+class ResultSolvesSerializer(serializers.Serializer):
+    value1 = serializers.CharField(required=False, allow_null=True)
+    value2 = serializers.CharField(required=False, allow_null=True)
+    value3 = serializers.CharField(required=False, allow_null=True)
+    value4 = serializers.CharField(required=False, allow_null=True)
+    value5 = serializers.CharField(required=False, allow_null=True)
+
+
+@extend_schema_serializer(examples=[openapi.result_example])
 class ResultSerializer(serializers.ModelSerializer):
     competition = CompetitionSerializer()
     event = EventSerializer()
@@ -36,11 +49,14 @@ class ResultSerializer(serializers.ModelSerializer):
     def get_wca_id(self, obj):
         return obj.person.id
 
+    @extend_schema_field(ResultSolvesSerializer)
     def get_solves(self, obj):
         rank_type = self.context.get("rank_type")
-        return parse_solves(obj, rank_type)
+        solves = parse_solves(obj, rank_type)
+        return ResultSolvesSerializer(solves).data
 
 
+@extend_schema_serializer(examples=[openapi.person_example])
 class PersonSerializer(serializers.ModelSerializer):
     gender = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
@@ -60,8 +76,10 @@ class PersonSerializer(serializers.ModelSerializer):
     def get_gender(self, obj):
         return obj.get_gender_display()
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_avatar(self, obj):
         return api.get_avatar(obj)
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_career(self, obj):
         return api.get_career_details(obj)

@@ -208,7 +208,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "api.openapi.CustomAutoSchema",
 }
 
 
@@ -216,14 +216,19 @@ REST_FRAMEWORK = {
 # https://drf-spectacular.readthedocs.io/en/latest/
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "PCA",
-    "VERSION": "1.0.0",
+    "TITLE": "PCA API",
+    "VERSION": "1.0",
     "SWAGGER_UI_SETTINGS": {
         "deepLinking": True,
         "persistAuthorization": True,
+        "defaultModelsExpandDepth": 2,
+        "showExtensions": True,
+        "showCommonExtensions": True,
     },
     "SERVE_INCLUDE_SCHEMA": False,
     "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": False,
+    "SWAGGER_UI_DIST": "//unpkg.com/swagger-ui-dist@3",
+    "SWAGGER_UI_FAVICON_HREF": "//unpkg.com/swagger-ui-dist@3/favicon-32x32.png",
 }
 
 
