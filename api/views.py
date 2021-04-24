@@ -44,13 +44,17 @@ class WCALoginView(SocialLoginView):
 
     serializer_class = WCALoginSerializer
     adapter_class = WorldCubeAssociationOAuth2Adapter
-    callback_url = app_settings.WCA_CALLBACK_URL
     client_class = OAuth2Client
+    callback_url = app_settings.WCA_DEFAULT_CALLBACK_URL
 
-    def get_serializer(self, *args, **kwargs):
-        serializer_class = self.get_serializer_class()
-        kwargs["context"] = self.get_serializer_context()
-        return serializer_class(*args, **kwargs)
+    def post(self, request, *agrs, **kwargs):
+        self.serializer = self.get_serializer(data=self.request.data)
+        callback_url = self.serializer.initial_data.get("callback_url")
+        if callback_url:
+            self.callback_url = callback_url
+        self.serializer.is_valid(raise_exception=True)
+        self.login()
+        return self.get_response()
 
 
 class UserRetrieveAPIView(RetrieveAPIView):

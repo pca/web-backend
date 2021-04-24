@@ -1,7 +1,9 @@
 from dj_rest_auth.registration.serializers import SocialLoginSerializer
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
+from . import app_settings
 from .models import RegionUpdateRequest
 
 User = get_user_model()
@@ -10,6 +12,12 @@ User = get_user_model()
 class WCALoginSerializer(SocialLoginSerializer):
     access_token = None
     id_token = None
+    callback_url = serializers.CharField(required=False, allow_blank=True)
+
+    def validate_callback_url(self, url):
+        if url not in app_settings.WCA_ALLOWED_CALLBACK_URLS:
+            raise serializers.ValidationError(_("Url is not allowed"))
+        return url
 
 
 class RegionSerializer(serializers.Serializer):
