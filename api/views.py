@@ -58,6 +58,8 @@ class WCALoginView(SocialLoginView):
 
 
 class UserRetrieveAPIView(RetrieveAPIView):
+    """ Retrieve authenticated user """
+
     serializer_class = UserDetailSerializer
     permission_classes = (IsAuthenticated,)
     queryset = User.objects.none()
@@ -66,22 +68,24 @@ class UserRetrieveAPIView(RetrieveAPIView):
         return self.request.user
 
 
-class RegionListAPIView(ListAPIView):
+class RegionListAPIView(APIView):
     """ List regions in the Philippines """
 
     serializer_class = RegionSerializer
+    action = "list"
 
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         regions = [{"id": r_id, "name": name} for r_id, name in User.REGION_CHOICES]
         return Response(regions)
 
 
-class ZoneListAPIView(ListAPIView):
-    """ List of region zones in the Philippines """
+class ZoneListAPIView(APIView):
+    """ List region zones in the Philippines """
 
     serializer_class = ZoneSerializer
+    action = "list"
 
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         zones = [{"id": zone_id, "name": name} for zone_id, name in User.ZONE_CHOICES]
         return Response(zones)
 
@@ -325,6 +329,15 @@ class RegionUpdateRequestListCreateAPIView(ListCreateAPIView):
     serializer_class = RegionUpdateRequestSerializer
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, *args, **kwargs):
+        """ List region-update-requests of the user """
+
+    def post(self, request, *args, **kwargs):
+        """Create a region-update-request.
+
+        A region-update-request can only be created once per year.
+        """
+
     def get_queryset(self):
         return RegionUpdateRequest.objects.filter(user=self.request.user).order_by(
             "-created_at"
@@ -358,6 +371,7 @@ class NewsListAPIView(APIView):
     """ News Feed from Facebook Page """
 
     serializer_class = NewsSerializer
+    action = "list"
 
     @method_decorator(cache_page(60 * 10))
     def get(self, request, *args, **kwargs):

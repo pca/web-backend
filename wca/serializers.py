@@ -1,19 +1,17 @@
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from . import api, models, openapi
+from . import api, models
 from .utils import parse_solves, parse_value
 
 
-@extend_schema_serializer(examples=[openapi.event_example])
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Event
         fields = "__all__"
 
 
-@extend_schema_serializer(examples=[openapi.competition_example])
 class CompetitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Competition
@@ -28,7 +26,6 @@ class ResultSolvesSerializer(serializers.Serializer):
     value5 = serializers.CharField(required=False, allow_null=True)
 
 
-@extend_schema_serializer(examples=[openapi.result_example])
 class ResultSerializer(serializers.ModelSerializer):
     competition = CompetitionSerializer()
     event = EventSerializer()
@@ -56,7 +53,6 @@ class ResultSerializer(serializers.ModelSerializer):
         return ResultSolvesSerializer(solves).data
 
 
-@extend_schema_serializer(examples=[openapi.person_example])
 class PersonSerializer(serializers.ModelSerializer):
     gender = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()

@@ -10,9 +10,10 @@ User = get_user_model()
 
 
 class WCALoginSerializer(SocialLoginSerializer):
+    code = serializers.CharField()
+    callback_url = serializers.CharField(required=False, allow_null=True)
     access_token = None
     id_token = None
-    callback_url = serializers.CharField(required=False, allow_blank=True)
 
     def validate_callback_url(self, url):
         if url not in app_settings.WCA_ALLOWED_CALLBACK_URLS:
@@ -34,7 +35,6 @@ class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "id",
             "first_name",
             "last_name",
             "wca_id",
@@ -64,7 +64,7 @@ class RegionUpdateRequestSerializer(serializers.ModelSerializer):
 
 class NewsSerializer(serializers.Serializer):
     from_name = serializers.CharField()
-    message = serializers.CharField()
-    image = serializers.URLField()
+    message = serializers.CharField(required=False, allow_blank=True)
+    image = serializers.URLField(required=False, allow_blank=True)
     permalink = serializers.URLField()
     created_at = serializers.DateTimeField()
