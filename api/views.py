@@ -1,9 +1,9 @@
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from rest_auth.registration.views import SocialLoginView
 from rest_framework import exceptions
 from rest_framework.generics import (
     ListAPIView,
@@ -28,6 +28,7 @@ from .serializers import (
     RegionUpdateRequestSerializer,
     UserDetailSerializer,
     UserRegionUpdateSerializer,
+    WCALoginSerializer,
     ZoneSerializer,
 )
 from .utils import get_facebook_posts
@@ -39,15 +40,9 @@ WCA_PROVIDER = "worldcubeassociation"
 
 
 class WCALoginView(SocialLoginView):
-    """Login with WCA code. access_token is not required.
+    """ Login with WCA oauth authorization code """
 
-    WCA Login flow
-
-    1. Redirect users to https://www.worldcubeassociation.org/oauth/authorize/?client_id=<wca_app_id>&redirect_uri=<frontend_app_url>&response_type=code&scope=
-    2. After successful WCA login, users will be redirected to <frontend_app_url>?code=<user_auth_code>
-    3. Use <user_auth_code> in this API.
-    """
-
+    serializer_class = WCALoginSerializer
     adapter_class = WorldCubeAssociationOAuth2Adapter
     callback_url = app_settings.WCA_CALLBACK_URL
     client_class = OAuth2Client

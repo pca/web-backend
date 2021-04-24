@@ -1,5 +1,5 @@
 from django.urls import path
-from rest_auth.views import LogoutView
+from dj_rest_auth.views import LogoutView
 
 from . import views
 

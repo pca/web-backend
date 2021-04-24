@@ -1,9 +1,15 @@
+from dj_rest_auth.registration.serializers import SocialLoginSerializer
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from .models import RegionUpdateRequest
 
 User = get_user_model()
+
+
+class WCALoginSerializer(SocialLoginSerializer):
+    access_token = None
+    id_token = None
 
 
 class RegionSerializer(serializers.Serializer):

@@ -54,8 +54,8 @@ THIRD_PARTY_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "wca_allauth",
-    "rest_auth",
-    "rest_auth.registration",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
     "drf_spectacular",
     "corsheaders",
 ]
