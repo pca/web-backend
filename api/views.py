@@ -5,12 +5,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework import exceptions
-from rest_framework.generics import (
-    ListAPIView,
-    ListCreateAPIView,
-    RetrieveAPIView,
-    UpdateAPIView,
-)
+from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -27,7 +22,6 @@ from .serializers import (
     RegionSerializer,
     RegionUpdateRequestSerializer,
     UserDetailSerializer,
-    UserRegionUpdateSerializer,
     WCALoginSerializer,
     ZoneSerializer,
 )
@@ -296,33 +290,6 @@ class RegionalRankingAverageAPIView(RankingBaseAPIView):
             .order_by("average")
         )
         return results[:limit]
-
-
-class UserRegionUpdateAPIView(UpdateAPIView):
-    serializer_class = UserRegionUpdateSerializer
-    queryset = User.objects.none()
-    permission_classes = [IsAuthenticated]
-
-    def get_object(self):
-        return self.request.user
-
-    def update(self, request, *args, **kwargs):
-        super().check_permissions(request)
-        user = self.get_object()
-
-        if user.is_staff or user.is_superuser:
-            return
-
-        if user.region:
-            self.permission_denied(
-                request,
-                message=(
-                    "Not allowed to set region more than once. "
-                    "Send a region update request (only allowed once a year.)"
-                ),
-            )
-
-        return super().update(request, *args, **kwargs)
 
 
 class RegionUpdateRequestListCreateAPIView(ListCreateAPIView):

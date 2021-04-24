@@ -8,7 +8,6 @@ urlpatterns = [
     path("auth/login/wca/", views.WCALoginView.as_view()),
     path("auth/logout/", LogoutView.as_view()),
     path("user/", views.UserRetrieveAPIView.as_view()),
-    path("user/region/", views.UserRegionUpdateAPIView.as_view()),
     path(
         "user/region-update-requests/",
         views.RegionUpdateRequestListCreateAPIView.as_view(),

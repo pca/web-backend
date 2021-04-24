@@ -44,12 +44,6 @@ class UserDetailSerializer(serializers.ModelSerializer):
         )
 
 
-class UserRegionUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ("region",)
-
-
 class RegionUpdateRequestSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
 
