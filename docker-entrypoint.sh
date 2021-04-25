@@ -13,6 +13,12 @@ then
     exit 0
 fi
 
+if [ "$1" = "createsuperuser" ]
+then
+    python manage.py createsuperuser
+    exit 0
+fi
+
 if [ "$1" = "runserver" ]
 then
     python manage.py runserver 0.0.0.0:8000
