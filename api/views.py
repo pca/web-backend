@@ -292,12 +292,14 @@ class RegionUpdateRequestListCreateAPIView(ListCreateAPIView):
 
     def get(self, request, *args, **kwargs):
         """ List region-update-requests of the user """
+        return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         """Create a region-update-request.
 
         A region-update-request can only be created once per year.
         """
+        return super().post(request, *args, **kwargs)
 
     def get_queryset(self):
         return RegionUpdateRequest.objects.filter(user=self.request.user).order_by(
