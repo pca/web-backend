@@ -1,21 +1,15 @@
-Philippine Cubers Association
+Philippine Cubers Association API
 ===
+[![Test](https://github.com/pca/web-backend/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/pca/web-backend/actions?query=branch%3Amaster)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-This is the new PCA web repo written in python. Live test server: [https://www.pinoycubers.org/](https://www.pinoycubers.org/)
-
-## Features
-
-1. **WCA Login** - Link your WCA Account
-2. **Compititions** - Updated list of upcoming competitions
-3. **National Rankings** - View the national rankings
-4. **Regional Rankings (Unofficial)** - View the regional rankings
+API that powers [pinoycubers.org](https://pinoycubers.org/). Built with Django and <3.
 
 ## WCA Data
 
-All official competition records and data are owned by [the WCA (World Cube Assocation)](https://www.worldcubeassociation.org).
-No official record has been tampered/modified.
+All official competition results and data are owned by [the WCA (World Cube Assocation)](https://www.worldcubeassociation.org)
+published at [https://www.worldcubeassociation.org/results/](https://www.worldcubeassociation.org/results/).
 
 ## Setup
 
@@ -44,19 +38,19 @@ No official record has been tampered/modified.
 1. Run database migrations.
 
     ```
-    $ docker-compose exec pca-api python manage.py migrate
+    $ docker-compose run --rm pca-api migrate
     ```
 
 2. Import WCA database.
 
     ```
-    $ docker-compose exec pca-api sh /app/sync_wca_database.sh
+    $ docker-compose run --rm pca-api syncwca
     ```
 
 3. Create a superuser.
 
     ```
-    $ docker-compose exec pca-api python manage.py createsuperuser
+    $ docker-compose run --rm pca-api createsuperuser
     ```
 
 ## Developers
