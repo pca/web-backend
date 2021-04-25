@@ -15,9 +15,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_FILE = os.path.join(BASE_DIR, ".env")
 
 env = environ.Env(
+    SECRET_KEY=(str, "defaultsecret"),
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, ["*"]),
     CORS_ALLOWED_ORIGINS=(list, []),
+    DATABASE_URL=(str, "postgres://pca:password@postgres:5432/pca_api"),
+    REDIS_CACHE_URL=(str, "redis://redis:6379/0"),
     SENTRY_DSN=(str, None),
     SENTRY_TRACES_SAMPLE_RATE=(float, 1.0),
 )
