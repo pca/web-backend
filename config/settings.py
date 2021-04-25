@@ -6,6 +6,8 @@ import os
 from pathlib import Path
 
 import environ
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -16,6 +18,8 @@ env = environ.Env(
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, ["*"]),
     CORS_ALLOWED_ORIGINS=(list, []),
+    SENTRY_DSN=(str, None),
+    SENTRY_TRACES_SAMPLE_RATE=(float, 1.0),
 )
 env.read_env(ENV_FILE)
 
@@ -236,3 +240,17 @@ SPECTACULAR_SETTINGS = {
 # https://github.com/adamchainz/django-cors-headers
 
 CORS_ALLOWED_ORIGINS = env("CORS_ALLOWED_ORIGINS")
+
+
+# Setry
+# https://docs.sentry.io/platforms/python/guides/django/
+
+SENTRY_DSN = env("SENTRY_DSN")
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=env("SENTRY_TRACES_SAMPLE_RATE"),
+        send_default_pii=True,
+    )
