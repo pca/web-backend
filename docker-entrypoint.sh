@@ -19,9 +19,9 @@ then
     exit 0
 fi
 
-if [ "$1" = "runserver" ]
+if [ "$1" = "runserver_plus" ]
 then
-    python manage.py runserver 0.0.0.0:8000
+    python manage.py runserver_plus 0.0.0.0:8000
     exit 0
 fi
 
@@ -31,4 +31,4 @@ then
     exit 0
 fi
 
-gunicorn -k gevent -w 4 config.wsgi -b 0.0.0.0:8000 --access-logfile - --error-logfile - --reload
+exec "$@"

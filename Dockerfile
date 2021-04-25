@@ -13,3 +13,7 @@ RUN pip install -r /requirements.txt
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
+
+EXPOSE 8000
+CMD ["gunicorn", "-k", "gevent", "-w", "4", "config.wsgi", "-b", "0.0.0.0:8000", \
+    "--access-logfile", "-", "--error-logfile", "-"]

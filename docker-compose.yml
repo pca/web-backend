@@ -15,6 +15,7 @@ services:
       - 8000:8000
     volumes:
       - ./:/app/
+    command: runserver_plus
 
   postgres:
     image: postgres:12.5-alpine
