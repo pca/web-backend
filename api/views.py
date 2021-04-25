@@ -116,7 +116,6 @@ class NationalRankingSingleAPIView(RankingBaseAPIView):
 
     def get_queryset(self):
         event = self.get_event()
-        limit = self.get_limit()
         result_ids = (
             Result.objects.filter(country_id=PH_COUNTRY_ID, event=event, best__gt=0)
             .order_by("person_id", "best")
@@ -128,7 +127,7 @@ class NationalRankingSingleAPIView(RankingBaseAPIView):
             .select_related("event", "person", "competition")
             .order_by("best")
         )
-        return results[:limit]
+        return results
 
 
 class NationalRankingAverageAPIView(RankingBaseAPIView):
@@ -138,7 +137,6 @@ class NationalRankingAverageAPIView(RankingBaseAPIView):
 
     def get_queryset(self):
         event = self.get_event()
-        limit = self.get_limit()
         result_ids = (
             Result.objects.filter(country_id=PH_COUNTRY_ID, event=event, average__gt=0)
             .order_by("person_id", "average")
@@ -150,7 +148,7 @@ class NationalRankingAverageAPIView(RankingBaseAPIView):
             .select_related("event", "person", "competition")
             .order_by("average")
         )
-        return results[:limit]
+        return results
 
 
 class ZonalRankingBaseAPIView(RankingBaseAPIView):
@@ -181,7 +179,6 @@ class ZonalRankingSingleAPIView(ZonalRankingBaseAPIView):
 
     def get_queryset(self):
         event = self.get_event()
-        limit = self.get_limit()
         wca_ids = self.get_wca_ids()
         result_ids = (
             Result.objects.filter(
@@ -199,7 +196,7 @@ class ZonalRankingSingleAPIView(ZonalRankingBaseAPIView):
             .select_related("event", "person", "competition")
             .order_by("best")
         )
-        return results[:limit]
+        return results
 
 
 class ZonalRankingAverageAPIView(ZonalRankingBaseAPIView):
@@ -209,7 +206,6 @@ class ZonalRankingAverageAPIView(ZonalRankingBaseAPIView):
 
     def get_queryset(self):
         event = self.get_event()
-        limit = self.get_limit()
         wca_ids = self.get_wca_ids()
         result_ids = (
             Result.objects.filter(
@@ -227,7 +223,7 @@ class ZonalRankingAverageAPIView(ZonalRankingBaseAPIView):
             .select_related("event", "person", "competition")
             .order_by("best")
         )
-        return results[:limit]
+        return results
 
 
 class RegionalRankingSingleAPIView(RankingBaseAPIView):
@@ -238,7 +234,6 @@ class RegionalRankingSingleAPIView(RankingBaseAPIView):
     def get_queryset(self):
         region = self.kwargs.get("region_id")
         event = self.get_event()
-        limit = self.get_limit()
         wca_ids = User.objects.filter(
             region=region, socialaccount__provider=WCA_PROVIDER, wca_id__isnull=False
         ).values_list("wca_id")
@@ -258,7 +253,7 @@ class RegionalRankingSingleAPIView(RankingBaseAPIView):
             .select_related("event", "person", "competition")
             .order_by("best")
         )
-        return results[:limit]
+        return results
 
 
 class RegionalRankingAverageAPIView(RankingBaseAPIView):
@@ -269,7 +264,6 @@ class RegionalRankingAverageAPIView(RankingBaseAPIView):
     def get_queryset(self):
         region = self.kwargs.get("region_id")
         event = self.get_event()
-        limit = self.get_limit()
         wca_ids = User.objects.filter(
             region=region, socialaccount__provider=WCA_PROVIDER, wca_id__isnull=False
         ).values_list("wca_id")
@@ -289,7 +283,7 @@ class RegionalRankingAverageAPIView(RankingBaseAPIView):
             .select_related("event", "person", "competition")
             .order_by("average")
         )
-        return results[:limit]
+        return results
 
 
 class RegionUpdateRequestListCreateAPIView(ListCreateAPIView):
