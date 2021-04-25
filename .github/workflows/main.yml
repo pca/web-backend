@@ -1,0 +1,36 @@
+name: test
+
+on:
+  push:
+    branches: [ master, development ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: python:3.8-slim-buster
+
+    services:
+      postgres:
+        image: postgres:12.6-alpine
+        env:
+          POSTGRES_USER: pca
+          POSTGRES_PASSWORD: password
+          POSTGRES_BD: pca_api
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Test with pytest
+      run: |
+        pytest
