@@ -1,6 +1,6 @@
 coverage==5.5
 dj-rest-auth==2.1.4
-Django==3.2
+Django==3.2.2
 django-admin-interface==0.16.1
 django-allauth==0.44.0
 django-cors-headers==3.7.0
