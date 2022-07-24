@@ -31,6 +31,12 @@ then
     exit 0
 fi
 
+if [ "$1" = "runserver_prod" ]
+then
+    gunicorn -k gevent config.wsgi -b 0.0.0.0:8000 --access-logfile - --error-logfile -
+    exit 0
+fi
+
 if [ "$1" = "syncwca" ]
 then
     sh /app/sync_wca_database.sh
