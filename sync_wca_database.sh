@@ -16,4 +16,4 @@ echo "Unzipping archive"
 unzip -o "$data_dir/WCA_export.tsv.zip" -d "$dump_dir"
 
 echo "Importing WCA data"
-python "$dir/manage.py" runscript import_wca_data
+python "$dir/manage.py" import_wca_data
