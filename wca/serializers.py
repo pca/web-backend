@@ -32,10 +32,19 @@ class ResultSerializer(serializers.ModelSerializer):
     value = serializers.SerializerMethodField()
     wca_id = serializers.SerializerMethodField()
     solves = serializers.SerializerMethodField()
+    region = serializers.CharField(read_only=True, allow_null=True)
 
     class Meta:
         model = models.Result
-        fields = ("competition", "event", "value", "person_name", "wca_id", "solves")
+        fields = (
+            "competition",
+            "event",
+            "value",
+            "person_name",
+            "wca_id",
+            "solves",
+            "region",
+        )
 
     def get_value(self, obj):
         rank_type = self.context.get("rank_type")

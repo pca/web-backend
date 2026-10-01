@@ -131,6 +131,7 @@ wca_result_list_example = OpenApiExample(
             "value": "6.51",
             "person_name": "Juan dela Cruz",
             "wca_id": "2021DELA01",
+            "region": "NCR",
             "solves": {
                 "solve1": "7.93",
                 "solve2": "6.51",

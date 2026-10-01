@@ -1,6 +1,7 @@
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib.auth import get_user_model
+from django.db.models import OuterRef, Subquery
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -96,6 +97,10 @@ class RankingBaseAPIView(ListAPIView):
     filter_backends = [LimitFilter]
     rank_type = None
 
+    def add_region(self, queryset):
+        region = User.objects.filter(wca_id=OuterRef("person_id")).values("region")[:1]
+        return queryset.annotate(region=Subquery(region))
+
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["rank_type"] = self.rank_type
@@ -127,7 +132,7 @@ class NationalRankingSingleAPIView(RankingBaseAPIView):
             .select_related("event", "person", "competition")
             .order_by("best")
         )
-        return results
+        return self.add_region(results)
 
 
 class NationalRankingAverageAPIView(RankingBaseAPIView):
@@ -148,7 +153,7 @@ class NationalRankingAverageAPIView(RankingBaseAPIView):
             .select_related("event", "person", "competition")
             .order_by("average")
         )
-        return results
+        return self.add_region(results)
 
 
 class ZonalRankingBaseAPIView(RankingBaseAPIView):
@@ -196,7 +201,7 @@ class ZonalRankingSingleAPIView(ZonalRankingBaseAPIView):
             .select_related("event", "person", "competition")
             .order_by("best")
         )
-        return results
+        return self.add_region(results)
 
 
 class ZonalRankingAverageAPIView(ZonalRankingBaseAPIView):
@@ -223,7 +228,7 @@ class ZonalRankingAverageAPIView(ZonalRankingBaseAPIView):
             .select_related("event", "person", "competition")
             .order_by("best")
         )
-        return results
+        return self.add_region(results)
 
 
 class RegionalRankingSingleAPIView(RankingBaseAPIView):
@@ -253,7 +258,7 @@ class RegionalRankingSingleAPIView(RankingBaseAPIView):
             .select_related("event", "person", "competition")
             .order_by("best")
         )
-        return results
+        return self.add_region(results)
 
 
 class RegionalRankingAverageAPIView(RankingBaseAPIView):
@@ -283,7 +288,7 @@ class RegionalRankingAverageAPIView(RankingBaseAPIView):
             .select_related("event", "person", "competition")
             .order_by("average")
         )
-        return results
+        return self.add_region(results)
 
 
 class RegionUpdateRequestListCreateAPIView(ListCreateAPIView):
