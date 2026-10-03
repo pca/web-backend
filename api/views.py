@@ -1,7 +1,7 @@
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib.auth import get_user_model
-from django.db.models import OuterRef, Subquery
+from django.db.models import F, OuterRef, Subquery
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -113,6 +113,28 @@ class RankingBaseAPIView(ListAPIView):
             raise exceptions.NotFound("Event not found.")
         return event
 
+    def get_ranked_results(self, event, value_field, wca_ids=None):
+        filters = {
+            "country_id": PH_COUNTRY_ID,
+            "event": event,
+            "{}__gt".format(value_field): 0,
+        }
+        if wca_ids is not None:
+            filters["person_id__in"] = wca_ids
+        best_for_person = (
+            Result.objects.filter(person_id=OuterRef("person_id"), **filters)
+            .order_by(value_field, "id")
+            .values("id")[:1]
+        )
+        results = (
+            Result.objects.filter(**filters)
+            .annotate(best_result_id=Subquery(best_for_person))
+            .filter(id=F("best_result_id"))
+            .select_related("event", "person", "competition")
+            .order_by(value_field, "person_id")
+        )
+        return self.add_region(results)
+
 
 class NationalRankingSingleAPIView(RankingBaseAPIView):
     """ Official single national rankings """
@@ -121,18 +143,7 @@ class NationalRankingSingleAPIView(RankingBaseAPIView):
 
     def get_queryset(self):
         event = self.get_event()
-        result_ids = (
-            Result.objects.filter(country_id=PH_COUNTRY_ID, event=event, best__gt=0)
-            .order_by("person_id", "best")
-            .distinct("person_id")
-            .values_list("id")
-        )
-        results = (
-            Result.objects.filter(pk__in=result_ids)
-            .select_related("event", "person", "competition")
-            .order_by("best")
-        )
-        return self.add_region(results)
+        return self.get_ranked_results(event, "best")
 
 
 class NationalRankingAverageAPIView(RankingBaseAPIView):
@@ -142,18 +153,7 @@ class NationalRankingAverageAPIView(RankingBaseAPIView):
 
     def get_queryset(self):
         event = self.get_event()
-        result_ids = (
-            Result.objects.filter(country_id=PH_COUNTRY_ID, event=event, average__gt=0)
-            .order_by("person_id", "average")
-            .distinct("person_id")
-            .values_list("id")
-        )
-        results = (
-            Result.objects.filter(pk__in=result_ids)
-            .select_related("event", "person", "competition")
-            .order_by("average")
-        )
-        return self.add_region(results)
+        return self.get_ranked_results(event, "average")
 
 
 class ZonalRankingBaseAPIView(RankingBaseAPIView):
@@ -185,23 +185,7 @@ class ZonalRankingSingleAPIView(ZonalRankingBaseAPIView):
     def get_queryset(self):
         event = self.get_event()
         wca_ids = self.get_wca_ids()
-        result_ids = (
-            Result.objects.filter(
-                country_id=PH_COUNTRY_ID,
-                event=event,
-                best__gt=0,
-                person_id__in=wca_ids,
-            )
-            .order_by("person_id", "best")
-            .distinct("person_id")
-            .values_list("id")
-        )
-        results = (
-            Result.objects.filter(pk__in=result_ids)
-            .select_related("event", "person", "competition")
-            .order_by("best")
-        )
-        return self.add_region(results)
+        return self.get_ranked_results(event, "best", wca_ids)
 
 
 class ZonalRankingAverageAPIView(ZonalRankingBaseAPIView):
@@ -212,23 +196,7 @@ class ZonalRankingAverageAPIView(ZonalRankingBaseAPIView):
     def get_queryset(self):
         event = self.get_event()
         wca_ids = self.get_wca_ids()
-        result_ids = (
-            Result.objects.filter(
-                country_id=PH_COUNTRY_ID,
-                event=event,
-                average__gt=0,
-                person_id__in=wca_ids,
-            )
-            .order_by("person_id", "best")
-            .distinct("person_id")
-            .values_list("id")
-        )
-        results = (
-            Result.objects.filter(pk__in=result_ids)
-            .select_related("event", "person", "competition")
-            .order_by("best")
-        )
-        return self.add_region(results)
+        return self.get_ranked_results(event, "average", wca_ids)
 
 
 class RegionalRankingSingleAPIView(RankingBaseAPIView):
@@ -242,23 +210,7 @@ class RegionalRankingSingleAPIView(RankingBaseAPIView):
         wca_ids = User.objects.filter(
             region=region, socialaccount__provider=WCA_PROVIDER, wca_id__isnull=False
         ).values_list("wca_id")
-        result_ids = (
-            Result.objects.filter(
-                country_id=PH_COUNTRY_ID,
-                event=event,
-                best__gt=0,
-                person_id__in=wca_ids,
-            )
-            .order_by("person_id", "best")
-            .distinct("person_id")
-            .values_list("id")
-        )
-        results = (
-            Result.objects.filter(pk__in=result_ids)
-            .select_related("event", "person", "competition")
-            .order_by("best")
-        )
-        return self.add_region(results)
+        return self.get_ranked_results(event, "best", wca_ids)
 
 
 class RegionalRankingAverageAPIView(RankingBaseAPIView):
@@ -272,23 +224,7 @@ class RegionalRankingAverageAPIView(RankingBaseAPIView):
         wca_ids = User.objects.filter(
             region=region, socialaccount__provider=WCA_PROVIDER, wca_id__isnull=False
         ).values_list("wca_id")
-        result_ids = (
-            Result.objects.filter(
-                country_id=PH_COUNTRY_ID,
-                event=event,
-                average__gt=0,
-                person_id__in=wca_ids,
-            )
-            .order_by("person_id", "average")
-            .distinct("person_id")
-            .values_list("id")
-        )
-        results = (
-            Result.objects.filter(pk__in=result_ids)
-            .select_related("event", "person", "competition")
-            .order_by("average")
-        )
-        return self.add_region(results)
+        return self.get_ranked_results(event, "average", wca_ids)
 
 
 class RegionUpdateRequestListCreateAPIView(ListCreateAPIView):

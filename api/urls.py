@@ -2,6 +2,7 @@ from django.urls import path
 from dj_rest_auth.views import LogoutView
 
 from . import views
+from . import statistics_views
 
 app_name = "api"
 urlpatterns = [
@@ -52,4 +53,34 @@ urlpatterns = [
         name="person-retrieve",
     ),
     path("news/", views.NewsListAPIView.as_view(), name="news-list"),
+    path(
+        "statistics/regional/strength/events/<str:event_id>/",
+        statistics_views.RegionalStrengthByEventAPIView.as_view(),
+        name="statistics-regional-strength-event",
+    ),
+    path(
+        "statistics/regional/strength/regions/<str:region_id>/",
+        statistics_views.RegionalStrengthByRegionAPIView.as_view(),
+        name="statistics-regional-strength-region",
+    ),
+    path(
+        "statistics/growth/new-attendees/",
+        statistics_views.NewAttendeesAPIView.as_view(),
+        name="statistics-growth-new-attendees",
+    ),
+    path(
+        "statistics/growth/attendances/",
+        statistics_views.AttendancesAPIView.as_view(),
+        name="statistics-growth-attendances",
+    ),
+    path(
+        "statistics/growth/active-competitors/",
+        statistics_views.ActiveCompetitorsAPIView.as_view(),
+        name="statistics-growth-active-competitors",
+    ),
+    path(
+        "statistics/growth/popular-events/",
+        statistics_views.PopularEventsAPIView.as_view(),
+        name="statistics-growth-popular-events",
+    ),
 ]

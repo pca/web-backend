@@ -27,6 +27,17 @@ def test_region_list_api(api_client):
     assert len(resp_data) == len(User.REGION_CHOICES)
 
 
+def test_region_xviii_is_available_and_in_visayas(api_client):
+    response = api_client.get(reverse("api:region-list"))
+
+    assert response.status_code == 200
+    assert response.json()[-1] == {
+        "id": User.REGION_18,
+        "name": "Region XVIII (Visayas - Negros Island Region)",
+    }
+    assert User.REGION_18 in User.ZONE_REGIONS[User.ZONE_VISAYAS]
+
+
 def test_zone_list_api(api_client):
     url = reverse("api:zone-list")
     response = api_client.get(url)

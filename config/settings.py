@@ -216,6 +216,8 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "api.openapi.CustomAutoSchema",
+    # The statistics API uses ?format=single|average for the WCA result type.
+    "URL_FORMAT_OVERRIDE": None,
 }
 
 

@@ -1,0 +1,17 @@
+{
+  "version": "geoph-1.0-current-2024-135776d2",
+  "source_url": "https://github.com/jronnybravo/geoph/tree/135776d2b1acedad84e3a09292e2b759c89507dd/boundaries/2024",
+  "source_revision": "135776d2b1acedad84e3a09292e2b759c89507dd",
+  "source_valid_on": "2024-12-31",
+  "retrieved_on": "2026-10-03",
+  "coordinate_system": "EPSG:4326",
+  "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+  "attribution": "Philippine administrative boundaries (geoph), synthesized from PSA PSGC and NAMRIA/OCHA-HDX COD-AB data — CC BY 4.0.",
+  "processing_notes": "Converted the geoph 2024 regions shapefile to GeoJSON; mapped source PSGC pcodes PH01-PH19 to PCA's 18 region identifiers; retained region-level MultiPolygon geometry; rounded coordinates to six decimal places; and sorted features by stable source pcode. The source is an unofficial analytical boundary dataset reconciled against the official PSA PSGC roster, not a legal or survey-grade government boundary product. This one current snapshot is intentionally applied to competition history from 2007 onward.",
+  "source_component_checksums_sha256": {
+    "regions.shp": "7bfb492a01de782b9075ebc70ddb875abb1216f6ccec8dd62af04625fe5eea31",
+    "regions.shx": "8c78cbe44e312e9abed2256675596da0b8ab7579778a52bf50770a5a7bf614bc",
+    "regions.dbf": "d08d0d41ddf3a8068fbca2bcf27e12bfd3a9c4f6634dcb45d6078cb9b1eb2cad"
+  },
+  "geojson_checksum_sha256": "573fe398479e114de0738e6614a9889f99726e302c3c7c47b879a83005eed709"
+}

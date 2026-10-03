@@ -16,7 +16,12 @@ def get_avatar(person: Person) -> dict:
 
 
 def get_competition_count(person: Person) -> int:
-    return Result.objects.filter(person=person).distinct("competition").count()
+    return (
+        Result.objects.filter(person=person)
+        .values("competition_id")
+        .distinct()
+        .count()
+    )
 
 
 def _get_ranks_result(rank, rank_type):
@@ -35,13 +40,13 @@ def get_personal_records(person: Person) -> list:
         RanksSingle.objects.filter(person=person, event__in=event_ids)
         .select_related("event")
         .order_by("event__rank")
-        .distinct("event__rank")
+        .distinct()
     )
     ranks_average = (
         RanksAverage.objects.filter(person=person, event__in=event_ids)
         .select_related("event")
         .order_by("event__rank")
-        .distinct("event__rank")
+        .distinct()
     )
 
     for single in ranks_single:

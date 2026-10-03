@@ -6,9 +6,12 @@ class Continent(models.Model):
     id = models.CharField(primary_key=True, max_length=50)
     name = models.CharField(max_length=50)
     record_name = models.CharField(max_length=3, blank=True, null=True)
-    latitude = models.IntegerField()
-    longitude = models.IntegerField()
-    zoom = models.IntegerField()
+    # The WCA v2 public export no longer includes map-display coordinates.
+    # Keep the fields for compatibility with existing data, but allow new
+    # imports to leave them empty.
+    latitude = models.IntegerField(blank=True, null=True)
+    longitude = models.IntegerField(blank=True, null=True)
+    zoom = models.IntegerField(blank=True, null=True)
 
 
 class Country(models.Model):
@@ -115,6 +118,66 @@ class Competition(models.Model):
     delegates = models.ManyToManyField(Person, related_name="delegated_comps")
 
 
+class BoundaryDataset(models.Model):
+    """Provenance for the boundary snapshot used by regional classification."""
+
+    version = models.CharField(max_length=80, primary_key=True)
+    source_url = models.URLField(max_length=500)
+    retrieved_on = models.DateField()
+    coordinate_system = models.CharField(max_length=32, default="EPSG:4326")
+    license = models.CharField(max_length=240)
+    attribution = models.CharField(max_length=500, blank=True)
+    processing_notes = models.TextField()
+    checksum_sha256 = models.CharField(max_length=64, db_index=True)
+    feature_count = models.PositiveSmallIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class CompetitionRegionAssignment(models.Model):
+    STATUS_ASSIGNED = "assigned"
+    STATUS_MISSING_COORDINATES = "missing_coordinates"
+    STATUS_INVALID_COORDINATES = "invalid_coordinates"
+    STATUS_OUTSIDE_BOUNDARY = "outside_boundary"
+    STATUS_BOUNDARY = "boundary"
+    STATUS_OVERLAPPING_REGIONS = "overlapping_regions"
+    STATUS_CHOICES = (
+        (STATUS_ASSIGNED, "Assigned"),
+        (STATUS_MISSING_COORDINATES, "Missing coordinates"),
+        (STATUS_INVALID_COORDINATES, "Invalid coordinates"),
+        (STATUS_OUTSIDE_BOUNDARY, "Outside boundary"),
+        (STATUS_BOUNDARY, "On boundary"),
+        (STATUS_OVERLAPPING_REGIONS, "Overlapping regions"),
+    )
+
+    competition = models.OneToOneField(
+        Competition,
+        related_name="region_assignment",
+        on_delete=models.CASCADE,
+    )
+    boundary_dataset = models.ForeignKey(
+        BoundaryDataset,
+        related_name="competition_assignments",
+        on_delete=models.PROTECT,
+    )
+    region_code = models.CharField(max_length=2, blank=True, null=True, db_index=True)
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES, db_index=True)
+    classified_latitude = models.IntegerField(blank=True, null=True)
+    classified_longitude = models.IntegerField(blank=True, null=True)
+    classified_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=("boundary_dataset", "status"),
+                name="wca_assign_dataset_status_idx",
+            ),
+            models.Index(
+                fields=("boundary_dataset", "region_code"),
+                name="wca_assign_dataset_region_idx",
+            ),
+        ]
+
+
 class Format(models.Model):
     id = models.CharField(primary_key=True, max_length=1)
     name = models.CharField(max_length=50)
@@ -140,6 +203,14 @@ class RanksAverage(models.Model):
     continent_rank = models.IntegerField()
     country_rank = models.IntegerField()
 
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=("event", "country_rank", "person"),
+                name="wca_rankavg_event_rank_idx",
+            )
+        ]
+
 
 class RanksSingle(models.Model):
     person = models.ForeignKey(
@@ -156,6 +227,14 @@ class RanksSingle(models.Model):
     continent_rank = models.IntegerField()
     country_rank = models.IntegerField()
 
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=("event", "country_rank", "person"),
+                name="wca_ranksingle_event_rank_idx",
+            )
+        ]
+
 
 class RoundType(models.Model):
     id = models.CharField(primary_key=True, max_length=1)
@@ -166,6 +245,14 @@ class RoundType(models.Model):
 
 
 class Result(models.Model):
+    # Stable identifier introduced by the WCA v2 export.  It lets the importer
+    # join the separate result_attempts file without keeping every attempt in
+    # memory.  Null remains allowed for rows imported before v2.
+    wca_result_id = models.PositiveBigIntegerField(
+        blank=True,
+        null=True,
+        unique=True,
+    )
     competition = models.ForeignKey(
         Competition,
         max_length=32,
@@ -211,6 +298,18 @@ class Result(models.Model):
     value5 = models.IntegerField()
     regional_single_record = models.CharField(max_length=3, blank=True, null=True)
     regional_average_record = models.CharField(max_length=3, blank=True, null=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=("person", "competition"),
+                name="wca_result_person_comp_idx",
+            ),
+            models.Index(
+                fields=("competition", "event", "person"),
+                name="wca_result_comp_event_person",
+            ),
+        ]
 
 
 class Scramble(models.Model):
