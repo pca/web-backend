@@ -1,10 +1,11 @@
 import re
 
 from django.core.management.base import BaseCommand, CommandError
+from django.utils import timezone
 
 from api.services.snapshots import build_and_activate_snapshot
 from api.services.statistics_builder import build_all_statistics
-from wca.models import BoundaryDataset, Competition
+from wca.models import BoundaryDataset
 
 
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
@@ -32,13 +33,7 @@ class Command(BaseCommand):
 
         latest_year = options["latest_year"]
         if latest_year is None:
-            latest_year = (
-                Competition.objects.order_by("-year")
-                .values_list("year", flat=True)
-                .first()
-            )
-        if latest_year is None:
-            raise CommandError("No competitions are available to determine latest year")
+            latest_year = timezone.localdate().year
 
         try:
             snapshot, built = build_and_activate_snapshot(
