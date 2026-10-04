@@ -123,7 +123,7 @@ class Command(BaseCommand):
         except (OSError, json.JSONDecodeError) as error:
             raise CommandError("Unable to read WCA export metadata: {}".format(error))
 
-        version = str(metadata.get("export_format_version", ""))
+        version = str(metadata.get("export_format_version", "")).lstrip("v")
         if not metadata.get("export_date") or not version:
             raise CommandError(
                 "WCA metadata must contain export_date and export_format_version."

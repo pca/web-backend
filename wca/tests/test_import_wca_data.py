@@ -377,3 +377,13 @@ def test_rejects_unknown_export_major_version(tmp_path):
 
     with pytest.raises(CommandError, match="Unsupported WCA export format"):
         command.load_and_validate_metadata()
+
+
+def test_accepts_official_v_prefixed_export_version(tmp_path):
+    write_export(tmp_path, export_version="v2.0.2")
+    command = Command()
+    command.dump_dir = tmp_path
+
+    metadata = command.load_and_validate_metadata()
+
+    assert metadata["export_format_version"] == "v2.0.2"
