@@ -309,6 +309,22 @@ class Result(models.Model):
                 fields=("competition", "event", "person"),
                 name="wca_result_comp_event_person",
             ),
+            models.Index(
+                fields=("person", "event", "country", "best", "id"),
+                name="wca_res_person_evt_best_idx",
+            ),
+            models.Index(
+                fields=("event", "country", "best", "person"),
+                name="wca_res_evt_ctry_best_person",
+            ),
+            models.Index(
+                fields=("person", "event", "country", "average", "id"),
+                name="wca_res_person_evt_avg_idx",
+            ),
+            models.Index(
+                fields=("event", "country", "average", "person"),
+                name="wca_res_evt_ctry_avg_person",
+            ),
         ]
 
 
