@@ -4,6 +4,7 @@ from datetime import date
 from io import StringIO
 
 import pytest
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
@@ -306,6 +307,11 @@ def write_export(directory, *, export_version="2.0.2", latitude=14600000):
 @pytest.mark.django_db
 def test_imports_v2_export_and_reconstructs_five_attempts(tmp_path):
     write_export(tmp_path)
+    user = get_user_model().objects.create_user(
+        username="juan",
+        wca_id="2020TEST01",
+        region="NCR",
+    )
 
     call_command("import_wca_data", data_dir=str(tmp_path))
 
@@ -317,6 +323,8 @@ def test_imports_v2_export_and_reconstructs_five_attempts(tmp_path):
     assert list(Person.objects.values_list("id", flat=True)) == ["2020TEST01"]
     assert RanksSingle.objects.get().country_rank == 5
     assert RanksAverage.objects.get().country_rank == 5
+    user.refresh_from_db()
+    assert user.region == "NCR"
 
     result = Result.objects.get()
     assert result.wca_result_id == 101
