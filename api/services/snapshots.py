@@ -69,8 +69,6 @@ def build_and_activate_snapshot(
             snapshot = StatisticsSnapshot.objects.select_for_update().get(
                 pk=snapshot.pk
             )
-            snapshot.regional_strength_records.all().delete()
-            snapshot.growth_records.all().delete()
             coverage = builder(snapshot) or {}
             now = timezone.now()
             snapshot.status = StatisticsSnapshot.STATUS_READY

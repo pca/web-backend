@@ -12,12 +12,18 @@ from api.regions import REGION_CHOICES
 from wca.models import Event, RanksAverage, RanksSingle
 
 from .regional_strength import RankedCompetitor, calculate_event_strength
+from .snapshot_records import sync_snapshot_records
 
 
 RANK_MODELS = {
     RegionalStrengthRecord.RANK_SINGLE: RanksSingle,
     RegionalStrengthRecord.RANK_AVERAGE: RanksAverage,
 }
+
+# WCA exports keep retired events at the end of the event list with ranks in
+# the 990s. Match the frontend's active-event list so Regional Statistics only
+# prepares current events, while Growth Statistics can still show full history.
+CURRENT_EVENT_RANK_CUTOFF = 990
 
 
 def _home_regions_by_wca_id(wca_ids):
@@ -103,7 +109,9 @@ def build_regional_strength_records(snapshot):
     """Populate every valid event/rank type for a staging snapshot."""
     coverage = {}
     records = []
-    events = Event.objects.order_by("rank", "name", "id")
+    events = Event.objects.filter(rank__lt=CURRENT_EVENT_RANK_CUTOFF).order_by(
+        "rank", "name", "id"
+    )
     for event in events.iterator():
         for rank_type in RANK_MODELS:
             entries, worst_rank, match_coverage = load_event_strength_inputs(
@@ -138,5 +146,12 @@ def build_regional_strength_records(snapshot):
                         content_hash=_record_hash(payload),
                     )
                 )
-    RegionalStrengthRecord.objects.bulk_create(records, batch_size=500)
+    sync_snapshot_records(
+        model=RegionalStrengthRecord,
+        snapshot=snapshot,
+        desired_records=records,
+        key_fields=("event_id", "rank_type", "region_code"),
+        update_fields=("score", "placement", "contributor_count", "slots"),
+        batch_size=500,
+    )
     return coverage

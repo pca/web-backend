@@ -10,6 +10,7 @@ from api.regions import REGION_CHOICES
 from wca.models import Competition, CompetitionRegionAssignment, Event, Result
 
 from .regional_growth import Participation, calculate_growth_statistics
+from .snapshot_records import sync_snapshot_records
 
 
 def validate_competition_assignments(boundary_dataset):
@@ -95,7 +96,14 @@ def build_growth_records(snapshot):
         )
         for value in values
     ]
-    GrowthAnnualRecord.objects.bulk_create(records, batch_size=1000)
+    sync_snapshot_records(
+        model=GrowthAnnualRecord,
+        snapshot=snapshot,
+        desired_records=records,
+        key_fields=("metric", "year", "region_code", "event_id"),
+        update_fields=("value", "unique_competitors"),
+        batch_size=1000,
+    )
 
     outcomes = dict(
         CompetitionRegionAssignment.objects.filter(

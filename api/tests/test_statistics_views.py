@@ -96,6 +96,27 @@ def test_regional_strength_rejects_invalid_format(api_client, event):
 
 
 @pytest.mark.django_db
+def test_regional_strength_rejects_unknown_event_and_region(api_client):
+    snapshot(boundary())
+
+    unknown_event = api_client.get(
+        reverse(
+            "api:statistics-regional-strength-event",
+            kwargs={"event_id": "unknown"},
+        )
+    )
+    unknown_region = api_client.get(
+        reverse(
+            "api:statistics-regional-strength-region",
+            kwargs={"region_id": "99"},
+        )
+    )
+
+    assert unknown_event.status_code == 404
+    assert unknown_region.status_code == 400
+
+
+@pytest.mark.django_db
 def test_regional_strength_region_response_includes_event_coverage(api_client, event):
     dataset = boundary()
     active = snapshot(dataset)
@@ -239,3 +260,42 @@ def test_same_export_and_boundary_skips_rebuild():
     assert result.pk == existing.pk
     assert built is False
     builder.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_successful_snapshot_atomically_replaces_previous_active_snapshot():
+    dataset = boundary()
+    previous = snapshot(dataset)
+
+    replacement, built = build_and_activate_snapshot(
+        export_version="2026-10-10",
+        export_checksum="9" * 64,
+        boundary_dataset=dataset,
+        latest_year=2026,
+        builder=lambda _snapshot: {"verified": True},
+    )
+
+    previous.refresh_from_db()
+    replacement.refresh_from_db()
+    assert built is True
+    assert previous.is_active is False
+    assert replacement.is_active is True
+    assert replacement.status == StatisticsSnapshot.STATUS_READY
+    assert replacement.coverage == {"verified": True}
+
+
+@pytest.mark.django_db
+def test_openapi_schema_documents_all_statistics_endpoints(api_client):
+    response = api_client.get(reverse("schema"))
+
+    assert response.status_code == 200
+    schema = response.json()
+    expected_paths = {
+        "/statistics/regional/strength/events/{event_id}/",
+        "/statistics/regional/strength/regions/{region_id}/",
+        "/statistics/growth/new-attendees/",
+        "/statistics/growth/attendances/",
+        "/statistics/growth/active-competitors/",
+        "/statistics/growth/popular-events/",
+    }
+    assert expected_paths <= set(schema["paths"])
