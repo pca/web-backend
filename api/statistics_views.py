@@ -15,6 +15,7 @@ from api.statistics_serializers import (
     PopularEventsResponseSerializer,
     RegionalStrengthEventResponseSerializer,
     RegionalStrengthRegionResponseSerializer,
+    RegionalStrengthRegionsResponseSerializer,
 )
 from wca.models import Event
 
@@ -91,6 +92,17 @@ def _strength_payload(record):
     return {
         "region_id": record.region_code,
         "region_name": REGION_NAMES[record.region_code],
+        "placement": record.placement,
+        "score": record.score,
+        "contributor_count": record.contributor_count,
+        "slots": record.slots,
+    }
+
+
+def _event_strength_payload(record):
+    return {
+        "event_id": record.event_id,
+        "event_name": record.event.name,
         "placement": record.placement,
         "score": record.score,
         "contributor_count": record.contributor_count,
@@ -183,16 +195,49 @@ class RegionalStrengthByRegionAPIView(APIView):
                     )
                     for record in records
                 },
-                "events": [
+                "events": [_event_strength_payload(record) for record in records],
+            }
+        )
+
+
+class RegionalStrengthRegionsAPIView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "format",
+                str,
+                enum=("single", "average"),
+                description="WCA ranking result type.",
+            )
+        ],
+        description="Prepared event strengths grouped across every PCA home region.",
+        responses=RegionalStrengthRegionsResponseSerializer,
+    )
+    def get(self, request):
+        rank_type = _rank_type(request)
+        snapshot = _active_snapshot()
+        records = list(
+            RegionalStrengthRecord.objects.filter(
+                snapshot=snapshot,
+                rank_type=rank_type,
+            )
+            .select_related("event")
+            .order_by("region_code", "placement", "event__rank", "event__name")
+        )
+        grouped = defaultdict(list)
+        for record in records:
+            grouped[record.region_code].append(_event_strength_payload(record))
+        return Response(
+            {
+                "snapshot": _snapshot_metadata(snapshot),
+                "format": rank_type,
+                "methodology": REGIONAL_REGION_METHODOLOGY,
+                "regions": [
                     {
-                        "event_id": record.event_id,
-                        "event_name": record.event.name,
-                        "placement": record.placement,
-                        "score": record.score,
-                        "contributor_count": record.contributor_count,
-                        "slots": record.slots,
+                        "region": {"id": region_id, "name": region_name},
+                        "events": grouped[region_id],
                     }
-                    for record in records
+                    for region_id, region_name in REGION_CHOICES
                 ],
             }
         )

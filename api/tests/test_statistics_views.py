@@ -166,6 +166,49 @@ def test_regional_strength_region_response_includes_event_coverage(api_client, e
 
 
 @pytest.mark.django_db
+def test_regional_strength_regions_response_groups_every_region(api_client, event):
+    active = snapshot(boundary())
+    slots = [
+        {
+            "wca_id": "TEST{}".format(index),
+            "name": "Test {}".format(index),
+            "national_rank": index,
+            "is_penalty": False,
+        }
+        for index in range(1, 6)
+    ]
+    RegionalStrengthRecord.objects.create(
+        snapshot=active,
+        event=event,
+        rank_type="single",
+        region_code="03",
+        score=15,
+        placement=1,
+        contributor_count=5,
+        slots=slots,
+        content_hash="f" * 64,
+    )
+
+    response = api_client.get(
+        reverse("api:statistics-regional-strength-regions"),
+        {"format": "single"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["regions"]) == 18
+    assert data["regions"][0] == {
+        "region": {"id": "NCR", "name": "NCR (Luzon - Metro Manila)"},
+        "events": [],
+    }
+    central_luzon = next(
+        group for group in data["regions"] if group["region"]["id"] == "03"
+    )
+    assert central_luzon["events"][0]["score"] == 15
+    assert central_luzon["events"][0]["slots"] == slots
+
+
+@pytest.mark.django_db
 def test_growth_response_includes_yoy_and_coverage(api_client):
     active = snapshot(boundary())
     for year, value in ((2007, 0), (2008, 5), (2009, 10)):
@@ -292,6 +335,7 @@ def test_openapi_schema_documents_all_statistics_endpoints(api_client):
     schema = response.json()
     expected_paths = {
         "/statistics/regional/strength/events/{event_id}/",
+        "/statistics/regional/strength/regions/",
         "/statistics/regional/strength/regions/{region_id}/",
         "/statistics/growth/new-attendees/",
         "/statistics/growth/attendances/",

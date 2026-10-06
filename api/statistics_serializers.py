@@ -56,6 +56,18 @@ class RegionalStrengthRegionResponseSerializer(serializers.Serializer):
     events = EventStrengthSerializer(many=True)
 
 
+class RegionEventStrengthGroupSerializer(serializers.Serializer):
+    region = NamedIdentifierSerializer()
+    events = EventStrengthSerializer(many=True)
+
+
+class RegionalStrengthRegionsResponseSerializer(serializers.Serializer):
+    snapshot = SnapshotMetadataSerializer()
+    format = serializers.ChoiceField(choices=("single", "average"))
+    methodology = serializers.CharField()
+    regions = RegionEventStrengthGroupSerializer(many=True)
+
+
 class AnnualValueSerializer(serializers.Serializer):
     year = serializers.IntegerField()
     value = serializers.IntegerField()

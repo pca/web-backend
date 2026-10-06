@@ -59,6 +59,11 @@ urlpatterns = [
         name="statistics-regional-strength-event",
     ),
     path(
+        "statistics/regional/strength/regions/",
+        statistics_views.RegionalStrengthRegionsAPIView.as_view(),
+        name="statistics-regional-strength-regions",
+    ),
+    path(
         "statistics/regional/strength/regions/<str:region_id>/",
         statistics_views.RegionalStrengthByRegionAPIView.as_view(),
         name="statistics-regional-strength-region",
