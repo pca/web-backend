@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from django.db.models import Case, IntegerField, Value, When
+from django.db.models import Case, IntegerField, Q, Value, When
 from rest_framework import exceptions
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
@@ -25,6 +25,8 @@ RANK_TYPES = {
     RegionalStrengthRecord.RANK_SINGLE,
     RegionalStrengthRecord.RANK_AVERAGE,
 }
+OFFICIAL_RANK_FORMAT = "official"
+OFFICIAL_SINGLE_EVENTS = {"333bf", "444bf", "555bf", "333mbf"}
 
 REGIONAL_EVENT_METHODOLOGY = (
     "Each region uses its five best national ranks for this event. Empty slots "
@@ -32,8 +34,10 @@ REGIONAL_EVENT_METHODOLOGY = (
     "better, and equal scores use standard competition ranking."
 )
 REGIONAL_REGION_METHODOLOGY = (
-    "Every event uses the same five-slot regional score. Events are ordered by "
-    "the region's placement, then official WCA event order."
+    "Each event uses its official WCA result type: averages for standard events "
+    "and Fewest Moves, and singles for blindfolded events and Multi-Blind. Every "
+    "event uses the same five-slot regional score. Events are ordered by the "
+    "region's placement, then official WCA event order."
 )
 GROWTH_METHODOLOGY = {
     GrowthAnnualRecord.METRIC_NEW_ATTENDEES: (
@@ -81,10 +85,14 @@ def _snapshot_metadata(snapshot):
     }
 
 
-def _rank_type(request):
+def _rank_type(request, allow_official=False):
     value = request.query_params.get("format", RegionalStrengthRecord.RANK_SINGLE)
-    if value not in RANK_TYPES:
-        raise exceptions.ParseError("format must be single or average")
+    allowed_types = RANK_TYPES | ({OFFICIAL_RANK_FORMAT} if allow_official else set())
+    if value not in allowed_types:
+        choices = (
+            "single, average, or official" if allow_official else "single or average"
+        )
+        raise exceptions.ParseError("format must be {}".format(choices))
     return value
 
 
@@ -103,6 +111,7 @@ def _event_strength_payload(record):
     return {
         "event_id": record.event_id,
         "event_name": record.event.name,
+        "format": record.rank_type,
         "placement": record.placement,
         "score": record.score,
         "contributor_count": record.contributor_count,
@@ -206,21 +215,35 @@ class RegionalStrengthRegionsAPIView(APIView):
             OpenApiParameter(
                 "format",
                 str,
-                enum=("single", "average"),
-                description="WCA ranking result type.",
+                enum=("single", "average", "official"),
+                description=(
+                    "WCA ranking result type, or official to select the standard "
+                    "result type separately for each event."
+                ),
             )
         ],
         description="Prepared event strengths grouped across every PCA home region.",
         responses=RegionalStrengthRegionsResponseSerializer,
     )
     def get(self, request):
-        rank_type = _rank_type(request)
+        rank_type = _rank_type(request, allow_official=True)
         snapshot = _active_snapshot()
-        records = list(
-            RegionalStrengthRecord.objects.filter(
-                snapshot=snapshot,
-                rank_type=rank_type,
+        records_query = RegionalStrengthRecord.objects.filter(snapshot=snapshot)
+        if rank_type == OFFICIAL_RANK_FORMAT:
+            records_query = records_query.filter(
+                Q(
+                    rank_type=RegionalStrengthRecord.RANK_SINGLE,
+                    event_id__in=OFFICIAL_SINGLE_EVENTS,
+                )
+                | (
+                    Q(rank_type=RegionalStrengthRecord.RANK_AVERAGE)
+                    & ~Q(event_id__in=OFFICIAL_SINGLE_EVENTS)
+                )
             )
+        else:
+            records_query = records_query.filter(rank_type=rank_type)
+        records = list(
+            records_query
             .select_related("event")
             .order_by("region_code", "placement", "event__rank", "event__name")
         )

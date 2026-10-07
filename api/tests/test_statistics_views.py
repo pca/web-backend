@@ -11,7 +11,7 @@ from api.models import (
     StatisticsSnapshot,
 )
 from api.services.snapshots import build_and_activate_snapshot
-from wca.models import BoundaryDataset
+from wca.models import BoundaryDataset, Event
 
 
 def boundary(version="test-boundaries-v1"):
@@ -205,7 +205,67 @@ def test_regional_strength_regions_response_groups_every_region(api_client, even
         group for group in data["regions"] if group["region"]["id"] == "03"
     )
     assert central_luzon["events"][0]["score"] == 15
+    assert central_luzon["events"][0]["format"] == "single"
     assert central_luzon["events"][0]["slots"] == slots
+
+
+@pytest.mark.django_db
+def test_regional_strength_regions_can_use_each_events_official_format(
+    api_client, event
+):
+    active = snapshot(boundary())
+    blindfolded = Event.objects.create(
+        id="333bf",
+        name="3x3x3 Blindfolded",
+        rank=70,
+        format="time",
+        cell_name="3x3x3 Blindfolded",
+    )
+    slots = [
+        {
+            "wca_id": "TEST{}".format(index),
+            "name": "Test {}".format(index),
+            "national_rank": index,
+            "is_penalty": False,
+        }
+        for index in range(1, 6)
+    ]
+    for record_event, rank_type, score in (
+        (event, "average", 15),
+        (event, "single", 999),
+        (blindfolded, "single", 25),
+        (blindfolded, "average", 888),
+    ):
+        RegionalStrengthRecord.objects.create(
+            snapshot=active,
+            event=record_event,
+            rank_type=rank_type,
+            region_code="03",
+            score=score,
+            placement=1,
+            contributor_count=5,
+            slots=slots,
+            content_hash=("{}:{}".format(record_event.id, rank_type) * 64)[:64],
+        )
+
+    response = api_client.get(
+        reverse("api:statistics-regional-strength-regions"),
+        {"format": "official"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["format"] == "official"
+    central_luzon = next(
+        group for group in data["regions"] if group["region"]["id"] == "03"
+    )
+    events = {item["event_id"]: item for item in central_luzon["events"]}
+    assert set(events) == {"333", "333bf"}
+    assert (events["333"]["format"], events["333"]["score"]) == ("average", 15)
+    assert (events["333bf"]["format"], events["333bf"]["score"]) == (
+        "single",
+        25,
+    )
 
 
 @pytest.mark.django_db

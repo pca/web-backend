@@ -41,6 +41,7 @@ class RegionalStrengthEventResponseSerializer(serializers.Serializer):
 class EventStrengthSerializer(serializers.Serializer):
     event_id = serializers.CharField()
     event_name = serializers.CharField()
+    format = serializers.ChoiceField(choices=("single", "average"))
     placement = serializers.IntegerField()
     score = serializers.IntegerField()
     contributor_count = serializers.IntegerField()
@@ -63,7 +64,7 @@ class RegionEventStrengthGroupSerializer(serializers.Serializer):
 
 class RegionalStrengthRegionsResponseSerializer(serializers.Serializer):
     snapshot = SnapshotMetadataSerializer()
-    format = serializers.ChoiceField(choices=("single", "average"))
+    format = serializers.ChoiceField(choices=("single", "average", "official"))
     methodology = serializers.CharField()
     regions = RegionEventStrengthGroupSerializer(many=True)
 
